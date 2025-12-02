@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de données interne - CEN Corse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1a5f4a;
+            --primary-dark: #0d3d2e;
+            --primary-light: #2d8a6b;
+            --accent-blue: #2a6495;
+            --accent-orange: #d97b2a;
+            --bg-main: #f7f9f8;
+            --bg-card: #ffffff;
+            --text-primary: #1a2e28;
+            --text-secondary: #4a5d56;
+            --text-muted: #7a8b85;
+            --border: #d4e0db;
+            --border-light: #e8efec;
+            --shadow-sm: 0 1px 3px rgba(26, 95, 74, 0.08);
+            --shadow-md: 0 4px 12px rgba(26, 95, 74, 0.1);
+            --shadow-lg: 0 8px 30px rgba(26, 95, 74, 0.12);
+        }
+
+        /* ========== LOGIN SCREEN ========== */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 40%, var(--primary-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        /* Formes géométriques de fond */
+        .login-bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .login-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        .login-shape-1 { width: 400px; height: 400px; background: var(--accent-blue); top: -100px; left: -100px; }
+        .login-shape-2 { width: 300px; height: 300px; background: var(--accent-orange); bottom: -50px; right: -50px; }
+        .login-shape-3 { width: 200px; height: 200px; background: white; top: 20%; right: 15%; }
+        .login-shape-4 { width: 150px; height: 150px; background: var(--accent-blue); bottom: 20%; left: 10%; }
+        .login-shape-5 { width: 100px; height: 100px; background: var(--accent-orange); top: 40%; left: 25%; }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 12px rgba(26, 95, 74, 0.2));
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .login-input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.3em;
+            text-align: center;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(26, 95, 74, 0.1);
+        }
+
+        .login-input.error {
+            border-color: #e74c3c;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(26, 95, 74, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 95, 74, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .login-error.visible {
+            opacity: 1;
+        }
+
+        .login-footer {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* App container hidden by default */
+        .app-container {
+            display: none;
+        }
+
+        .app-container.visible {
+            display: block;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 13px;
+        }
+
+        body {
+            font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            padding: 0.6rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Geometric shapes */
+        .geo-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .geo-green-1 { width: 180px; height: 180px; background: var(--primary-light); top: -60px; left: 5%; }
+        .geo-green-2 { width: 120px; height: 120px; background: var(--primary); bottom: -40px; left: 25%; }
+        .geo-green-3 { width: 90px; height: 90px; background: var(--primary-light); top: 10px; right: 35%; }
+        .geo-blue-1 { width: 150px; height: 150px; background: var(--accent-blue); top: -30px; right: 20%; }
+        .geo-blue-2 { width: 80px; height: 80px; background: var(--accent-blue); bottom: -20px; right: 40%; }
+        .geo-orange-1 { width: 100px; height: 100px; background: var(--accent-orange); top: -20px; right: 8%; }
+        .geo-orange-2 { width: 60px; height: 60px; background: var(--accent-orange); bottom: -15px; left: 45%; }
+
+        .header-content {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            height: 45px;
+            width: auto;
+            background: white;
+            padding: 5px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-text h1 {
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header-text p {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.75rem;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 100%;
+            padding: 0.75rem 1rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .search-section h2 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .search-section h2::before {
+            content: '';
+            width: 3px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 140px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            border: 1.5px solid var(--border);
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 2px rgba(26, 95, 74, 0.1);
+        }
+
+        .form-group.search-input {
+            flex: 2;
+            min-width: 200px;
+            position: relative;
+        }
+
+        /* Autocomplete Dropdown */
+        .autocomplete-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--primary-light);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 8px 24px rgba(26, 95, 74, 0.15);
+        }
+
+        .autocomplete-dropdown.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.15s ease;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: linear-gradient(to right, rgba(26, 95, 74, 0.08), rgba(26, 95, 74, 0.03));
+            color: var(--primary-dark);
+        }
+
+        .autocomplete-item mark {
+            background: rgba(217, 123, 42, 0.25);
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .autocomplete-info {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--bg-main);
+            font-style: italic;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .autocomplete-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .autocomplete-dropdown::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        .autocomplete-dropdown::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .autocomplete-show-more {
+            padding: 0.6rem 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: linear-gradient(to bottom, var(--bg-main), white);
+            border-top: 1px solid var(--border-light);
+            font-weight: 500;
+            transition: all 0.15s ease;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .autocomplete-show-more:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .autocomplete-show-more span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn {
+            padding: 0.4rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(26, 95, 74, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 95, 74, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-main);
+            color: var(--primary);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-reset {
+            background: white;
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-reset:hover {
+            background: var(--bg-main);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 0.5rem 0.75rem;
+            background: linear-gradient(to right, var(--bg-main), white);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .results-count {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .results-count strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .results-info {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-left: 0.5rem;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.75rem;
+        }
+
+        .pagination button {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            color: var(--text-secondary);
+            padding: 0 0.3rem;
+        }
+
+        .page-size-select {
+            padding: 0.2rem 0.4rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            background: white;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            height: 600px;
+            max-height: 600px;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            background: var(--primary-dark);
+            color: white;
+            padding: 0.4rem 0.5rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: var(--primary);
+        }
+
+        th.column-highlight {
+            background: var(--accent-orange) !important;
+            animation: pulse-highlight 0.5s ease-in-out 2;
+        }
+
+        @keyframes pulse-highlight {
+            0%, 100% { background: var(--accent-orange); }
+            50% { background: var(--primary); }
+        }
+
+        th .sort-icon {
+            margin-left: 0.3rem;
+            opacity: 0.5;
+            font-size: 0.6rem;
+        }
+
+        th.sorted .sort-icon {
+            opacity: 1;
+        }
+
+        td {
+            padding: 0.3rem 0.5rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tbody tr {
+            transition: background 0.1s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(26, 95, 74, 0.06);
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--bg-main);
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: rgba(26, 95, 74, 0.08);
+        }
+
+        /* Loading & Empty States */
+        .state-message {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .state-message svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .state-message h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .state-message p {
+            font-size: 0.75rem;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        /* Scrollbar */
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Highlight */
+        .highlight {
+            background: rgba(217, 123, 42, 0.3);
+            padding: 0 0.1em;
+            border-radius: 2px;
+        }
+
+        .loading-info {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-form { flex-direction: column; }
+            .form-group, .form-group.search-input { min-width: 100%; }
+            .btn { width: 100%; justify-content: center; }
+            .results-header { flex-direction: column; }
+            .pagination { justify-content: center; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-bg-shapes">
+            <div class="login-shape login-shape-1"></div>
+            <div class="login-shape login-shape-2"></div>
+            <div class="login-shape login-shape-3"></div>
+            <div class="login-shape login-shape-4"></div>
+            <div class="login-shape login-shape-5"></div>
+        </div>
+        <div class="login-card">
+            <img src="Logo_CENCorse-removebg-preview.png" alt="Logo CEN Corse" class="login-logo">
+            <h1 class="login-title">Accès restreint</h1>
+            <p class="login-subtitle">Base de données interne du CEN Corse</p>
+            <form id="loginForm">
+                <div class="login-input-group">
+                    <input type="password" 
+                           id="accessCode" 
+                           class="login-input" 
+                           placeholder="• • • • •"
+                           maxlength="5"
+                           autocomplete="off"
+                           inputmode="numeric">
+                </div>
+                <button type="submit" class="login-btn">Accéder à la base</button>
+                <p class="login-error" id="loginError">Code d'accès incorrect</p>
+            </form>
+            <p class="login-footer">Conservatoire d'Espaces Naturels de Corse</p>
+        </div>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div class="app-container" id="appContainer">
+    <header>
+        <div class="geo-shape geo-green-1"></div>
+        <div class="geo-shape geo-green-2"></div>
+        <div class="geo-shape geo-green-3"></div>
+        <div class="geo-shape geo-blue-1"></div>
+        <div class="geo-shape geo-blue-2"></div>
+        <div class="geo-shape geo-orange-1"></div>
+        <div class="geo-shape geo-orange-2"></div>
+        
+        <div class="header-content">
+            <img src="Logo_CENCorse-removebg-preview.png" alt="Logo CEN Corse" class="logo">
+            <div class="header-text">
+                <h1>Base de données interne - format SINP</h1>
+                <p>Conservatoire d'Espaces Naturels de Corse</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="search-section">
+            <h2>Rechercher dans la base</h2>
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="column">Colonne</label>
+                    <select id="column" name="column">
+                        <option value="">Choisir la colonne</option>
+                        <optgroup label="Source">
+                            <option value="source_fichier">Source fichier</option>
+                            <option value="Cadre_Acquisition">Cadre acquisition</option>
+                        </optgroup>
+                        <optgroup label="Taxonomie">
+                            <option value="nomvalide(R)">Nom scientifique</option>
+                            <option value="versionTAXREF">Version TAXREF</option>
+                        </optgroup>
+                        <optgroup label="Localisation">
+                            <option value="nomCommune">Commune</option>
+                        </optgroup>
+                        <optgroup label="Observation">
+                            <option value="observateurIdentite">Observateur</option>
+                            <option value="jourdateDebut">Date début</option>
+                            <option value="jourdateFin">Date fin</option>
+                        </optgroup>
+                        <optgroup label="Biologie">
+                            <option value="occStatutBiologique">Statut biologique</option>
+                            <option value="OccEtatBiologique">État biologique</option>
+                            <option value="occStadeDeVie">Stade de vie</option>
+                            <option value="occSexe">Sexe</option>
+                            <option value="denombrementMin">Dénombrement min</option>
+                            <option value="denombrementMax">Dénombrement max</option>
+                        </optgroup>
+                        <optgroup label="Habitat">
+                            <option value="codeHabitat">Code habitat</option>
+                            <option value="refHabitat">Référentiel habitat</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group search-input">
+                    <label for="search">Recherche</label>
+                    <input type="text" id="search" name="search" placeholder="Entrez votre recherche (ou laissez vide pour tout afficher)..." autocomplete="off">
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Rechercher
+                </button>
+                <button type="button" class="btn btn-reset" id="resetBtn">
+                    Réinitialiser
+                </button>
+            </form>
+        </section>
+
+        <section class="results-section">
+            <div class="results-header">
+                <span class="results-count" id="resultsCount">Chargement...</span>
+                <span class="results-info">Pour faciliter la lecture, certaines colonnes ne sont pas affichées. Lors de l'export CSV au format SINP, toutes les colonnes seront bien présentes.</span>
+                <div class="results-actions">
+                    <div class="pagination" id="pagination">
+                        <button id="prevPage" disabled>◄ Préc.</button>
+                        <span id="pageInfo">-</span>
+                        <button id="nextPage" disabled>Suiv. ►</button>
+                        <select class="page-size-select" id="pageSize">
+                            <option value="50">50 / page</option>
+                            <option value="100" selected>100 / page</option>
+                            <option value="200">200 / page</option>
+                            <option value="500">500 / page</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" id="exportBtn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        CSV
+                    </button>
+                </div>
+            </div>
+            <div class="table-wrapper" id="tableWrapper">
+                <div class="state-message loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des données...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© Conservatoire d'Espaces Naturels de Corse - BDD données internes</p>
+    </footer>
+    </div><!-- End app-container -->
+
+    <!-- LOGIN SCRIPT -->
+    <script>
+        const ACCESS_CODE = '20290';
+        const SESSION_KEY = 'cencorse_access';
+
+        const loginScreen = document.getElementById('loginScreen');
+        const appContainer = document.getElementById('appContainer');
+        const loginForm = document.getElementById('loginForm');
+        const accessCodeInput = document.getElementById('accessCode');
+        const loginError = document.getElementById('loginError');
+
+        // Vérifier si déjà authentifié
+        function checkAccess() {
+            const savedAccess = sessionStorage.getItem(SESSION_KEY);
+            if (savedAccess === 'granted') {
+                showApp();
+            }
+        }
+
+        // Afficher l'application
+        function showApp() {
+            loginScreen.classList.add('hidden');
+            appContainer.classList.add('visible');
+        }
+
+        // Gérer la soumission du formulaire
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = accessCodeInput.value;
+
+            if (code === ACCESS_CODE) {
+                sessionStorage.setItem(SESSION_KEY, 'granted');
+                loginScreen.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(showApp, 300);
+            } else {
+                accessCodeInput.classList.add('error');
+                loginError.classList.add('visible');
+                setTimeout(() => {
+                    accessCodeInput.classList.remove('error');
+                }, 400);
+            }
+        });
+
+        // Effacer l'erreur quand on tape
+        accessCodeInput.addEventListener('input', () => {
+            loginError.classList.remove('visible');
+        });
+
+        // Vérifier l'accès au chargement
+        checkAccess();
+    </script>
+
+    <style>
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: scale(1.02);
+            }
+        }
+    </style>
+
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://yzkgwctbtdmuelrvflrz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6a2d3Y3RidGRtdWVscnZmbHJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2MDk5NzYsImV4cCI6MjA4MDE4NTk3Nn0.U62M1GiFSsr3e44beKdUS5FWsS7ch2O43KXicGGri8w';
+        const TABLE_NAME = 'CENCORSE_BDD';
+
+        // Initialiser Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Colonnes à masquer dans la visualisation (mais présentes dans l'export CSV)
+        const HIDDEN_COLUMNS = [
+            'altitudeMin', 'altitudeMax', 'altitudeMoyenne',
+            'profondeurMin', 'profondeurMax', 'profondeurMoyenne',
+            'codeCommune', 'codeMaille', 'codeDepartement',
+            'natureObjetGeo', 'nomRefMaille', 'precisionGeometrie',
+            'typeInfoGeoCommune', 'anneeRefCommune',
+            'typeInfoGeoMaille', 'versionRefMaille',
+            'typeInfoGeoDepartement', 'anneeRefDepartement',
+            'codeME', 'versionME', 'typeInfoGeoMasseDEau', 'dateME',
+            'codeEN', 'typeEN', 'typeInfoGeoEN', 'versionEN',
+            'pente(R)', 'exposition(R)', 'commentLocal(R)',
+            'codeHabRef', 'codeHabitat', 'refHabitat', 'versionRefHabitat', 'CommentHabitat(R)',
+            'dSRFloutage(R)', 'Transf_BIOGR(R)',
+            'referenceBiblio',
+            'occMethodeDetermination', 'determinateurIdentite', 'determinateurMail', 'dateDetermination',
+            'preuveExistante', 'preuveNumerique', 'preuveNonNumerique', 'Commentaire Preuve'
+        ];
+
+        // Colonnes avec liste déroulante de suggestions
+        const COLUMNS_WITH_SUGGESTIONS = [
+            'source_fichier',
+            'Cadre_Acquisition', 
+            'nomCommune',
+            'nomvalide(R)',
+            'observateurIdentite'
+        ];
+
+        // Cache des valeurs uniques par colonne
+        let uniqueValuesCache = {};
+
+        // State
+        let allData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let pageSize = 100;
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        let columns = [];        // Toutes les colonnes (pour export CSV)
+        let displayColumns = []; // Colonnes visibles (sans les masquées)
+        let currentSearchTerm = '';
+        let currentSearchColumn = ''; // Colonne sur laquelle on recherche
+
+        // DOM Elements
+        const searchForm = document.getElementById('searchForm');
+        const columnSelect = document.getElementById('column');
+        const searchInput = document.getElementById('search');
+        const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+        const tableWrapper = document.getElementById('tableWrapper');
+        const resultsCount = document.getElementById('resultsCount');
+        const exportBtn = document.getElementById('exportBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageInfo = document.getElementById('pageInfo');
+        const pageSizeSelect = document.getElementById('pageSize');
+
+        // Load all data on start
+        async function loadAllData() {
+            showLoading('Chargement des données...');
+            
+            try {
+                let allResults = [];
+                let from = 0;
+                const batchSize = 1000;
+                let hasMore = true;
+
+                while (hasMore) {
+                    const { data, error } = await supabase
+                        .from(TABLE_NAME)
+                        .select('*')
+                        .range(from, from + batchSize - 1);
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        allResults = allResults.concat(data);
+                        from += batchSize;
+                        showLoading(`Chargement... ${allResults.length} lignes`);
+                        
+                        if (data.length < batchSize) hasMore = false;
+                    } else {
+                        hasMore = false;
+                    }
+                }
+
+                allData = allResults;
+                filteredData = [...allData];
+                
+                if (allData.length > 0) {
+                    columns = Object.keys(allData[0]);
+                    // Filtrer les colonnes pour l'affichage (insensible à la casse)
+                    displayColumns = columns.filter(col => {
+                        const colLower = col.toLowerCase();
+                        return !HIDDEN_COLUMNS.some(hidden => hidden.toLowerCase() === colLower);
+                    });
+                    // Pré-calculer les valeurs uniques pour les colonnes avec suggestions
+                    buildUniqueValuesCache();
+                }
+                
+                displayResults();
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage(`Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        // Colonnes triées par année (4 derniers caractères = année)
+        const COLUMNS_SORTED_BY_YEAR = ['source_fichier', 'Cadre_Acquisition'];
+
+        // Construire le cache des valeurs uniques
+        function buildUniqueValuesCache() {
+            COLUMNS_WITH_SUGGESTIONS.forEach(col => {
+                const values = new Set();
+                allData.forEach(row => {
+                    const val = row[col];
+                    if (val && String(val).trim()) {
+                        values.add(String(val).trim());
+                    }
+                });
+                
+                let sortedValues = Array.from(values);
+                
+                if (COLUMNS_SORTED_BY_YEAR.includes(col)) {
+                    // Tri par année décroissante (4 derniers caractères), puis alphabétique
+                    sortedValues.sort((a, b) => {
+                        const yearA = a.slice(-4);
+                        const yearB = b.slice(-4);
+                        // D'abord par année décroissante
+                        if (yearA !== yearB) {
+                            return yearB.localeCompare(yearA);
+                        }
+                        // Puis par ordre alphabétique
+                        return a.toLowerCase().localeCompare(b.toLowerCase());
+                    });
+                } else {
+                    // Tri alphabétique standard
+                    sortedValues.sort((a, b) => 
+                        a.toLowerCase().localeCompare(b.toLowerCase())
+                    );
+                }
+                
+                uniqueValuesCache[col] = sortedValues;
+            });
+        }
+
+        // Variable pour la navigation clavier
+        let selectedIndex = -1;
+        let showAllSpecies = false;
+
+        // Mettre à jour les suggestions dans le dropdown
+        function updateSuggestions(column, filterText = '', forceShowAll = false) {
+            autocompleteDropdown.innerHTML = '';
+            selectedIndex = -1;
+            
+            if (!COLUMNS_WITH_SUGGESTIONS.includes(column)) {
+                autocompleteDropdown.classList.remove('active');
+                return;
+            }
+
+            const values = uniqueValuesCache[column] || [];
+            const filter = filterText.toLowerCase();
+            
+            // Pour Nom scientifique : limiter à 50 sauf si "Voir plus" ou si on filtre
+            const isSpeciesColumn = column === 'nomvalide(R)';
+            const initialLimit = isSpeciesColumn && !forceShowAll && !filter ? 50 : 100;
+            
+            // Filtrer
+            const allFiltered = values.filter(v => !filter || v.toLowerCase().includes(filter));
+            const filtered = allFiltered.slice(0, forceShowAll ? allFiltered.length : initialLimit);
+            const hasMore = allFiltered.length > filtered.length;
+            
+            if (filtered.length === 0) {
+                autocompleteDropdown.classList.remove('active');
+                return;
+            }
+
+            // Info header
+            const info = document.createElement('div');
+            info.className = 'autocomplete-info';
+            if (hasMore) {
+                info.textContent = `${filtered.length} affichées sur ${allFiltered.length} suggestions`;
+            } else {
+                info.textContent = `${filtered.length} suggestion${filtered.length > 1 ? 's' : ''}`;
+            }
+            autocompleteDropdown.appendChild(info);
+
+            // Items
+            filtered.forEach((value, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.dataset.index = index;
+                
+                // Highlight matching text
+                if (filter) {
+                    const regex = new RegExp(`(${escapeRegExp(filter)})`, 'gi');
+                    item.innerHTML = value.replace(regex, '<mark>$1</mark>');
+                } else {
+                    item.textContent = value;
+                }
+                
+                item.addEventListener('click', () => {
+                    searchInput.value = value;
+                    autocompleteDropdown.classList.remove('active');
+                    showAllSpecies = false;
+                    filterData();
+                });
+                
+                autocompleteDropdown.appendChild(item);
+            });
+
+            // Bouton "Voir plus" pour Nom scientifique
+            if (hasMore && isSpeciesColumn && !filter) {
+                const showMoreBtn = document.createElement('div');
+                showMoreBtn.className = 'autocomplete-show-more';
+                showMoreBtn.innerHTML = `<span>▼ Voir les ${allFiltered.length - filtered.length} autres espèces</span>`;
+                showMoreBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showAllSpecies = true;
+                    updateSuggestions(column, filterText, true);
+                });
+                autocompleteDropdown.appendChild(showMoreBtn);
+            }
+
+            autocompleteDropdown.classList.add('active');
+        }
+
+        // Event listener pour le changement de colonne
+        columnSelect.addEventListener('change', () => {
+            const selectedColumn = columnSelect.value;
+            searchInput.value = '';
+            showAllSpecies = false;
+            autocompleteDropdown.classList.remove('active');
+        });
+
+        // Event listener pour la saisie dans le champ de recherche
+        searchInput.addEventListener('input', () => {
+            const selectedColumn = columnSelect.value;
+            if (COLUMNS_WITH_SUGGESTIONS.includes(selectedColumn)) {
+                updateSuggestions(selectedColumn, searchInput.value);
+            }
+        });
+
+        // Focus sur le champ de recherche - afficher suggestions
+        searchInput.addEventListener('focus', () => {
+            const selectedColumn = columnSelect.value;
+            if (COLUMNS_WITH_SUGGESTIONS.includes(selectedColumn)) {
+                updateSuggestions(selectedColumn, searchInput.value);
+            }
+        });
+
+        // Navigation clavier dans les suggestions
+        searchInput.addEventListener('keydown', (e) => {
+            const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
+            if (!items.length) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelectedItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateSelectedItem(items);
+            } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                e.preventDefault();
+                items[selectedIndex].click();
+            } else if (e.key === 'Escape') {
+                autocompleteDropdown.classList.remove('active');
+            }
+        });
+
+        function updateSelectedItem(items) {
+            items.forEach((item, i) => {
+                item.classList.toggle('selected', i === selectedIndex);
+                if (i === selectedIndex) {
+                    item.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+
+        // Fermer le dropdown quand on clique ailleurs
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !autocompleteDropdown.contains(e.target)) {
+                autocompleteDropdown.classList.remove('active');
+            }
+        });
+
+        // Search/Filter
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            filterData();
+        });
+
+        function filterData() {
+            const column = columnSelect.value;
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            currentSearchTerm = searchTerm;
+            currentSearchColumn = column; // Sauvegarder la colonne de recherche
+
+            if (!searchTerm) {
+                filteredData = [...allData];
+                currentSearchColumn = ''; // Pas de scroll si pas de recherche
+            } else if (column) {
+                filteredData = allData.filter(row => {
+                    const val = row[column];
+                    return val && String(val).toLowerCase().includes(searchTerm);
+                });
+            } else {
+                // Search in main columns
+                const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
+                filteredData = allData.filter(row => {
+                    return searchCols.some(col => {
+                        const val = row[col];
+                        return val && String(val).toLowerCase().includes(searchTerm);
+                    });
+                });
+                currentSearchColumn = ''; // Pas de scroll pour recherche globale
+            }
+
+            currentPage = 1;
+            displayResults();
+        }
+
+        // Reset
+        resetBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            columnSelect.value = '';
+            currentSearchTerm = '';
+            currentSearchColumn = '';
+            filteredData = [...allData];
+            currentPage = 1;
+            sortColumn = null;
+            sortDirection = 'asc';
+            autocompleteDropdown.classList.remove('active');
+            autocompleteDropdown.innerHTML = '';
+            // Scroll retour au début
+            tableWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+            displayResults();
+        });
+
+        // Sort
+        function sortData(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            filteredData.sort((a, b) => {
+                let valA = a[column] ?? '';
+                let valB = b[column] ?? '';
+                
+                // Try numeric sort
+                const numA = parseFloat(valA);
+                const numB = parseFloat(valB);
+                
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return sortDirection === 'asc' ? numA - numB : numB - numA;
+                }
+                
+                // String sort
+                valA = String(valA).toLowerCase();
+                valB = String(valB).toLowerCase();
+                
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            displayResults();
+        }
+
+        // Pagination
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayResults();
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayResults();
+            }
+        });
+
+        pageSizeSelect.addEventListener('change', () => {
+            pageSize = parseInt(pageSizeSelect.value);
+            currentPage = 1;
+            displayResults();
+        });
+
+        // Display results
+        function displayResults() {
+            if (!filteredData || filteredData.length === 0) {
+                tableWrapper.innerHTML = `
+                    <div class="state-message">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m15 9-6 6"></path>
+                            <path d="m9 9 6 6"></path>
+                        </svg>
+                        <h3>Aucun résultat</h3>
+                        <p>Aucune donnée ne correspond à votre recherche</p>
+                    </div>
+                `;
+                resultsCount.innerHTML = '<strong>0</strong> résultat';
+                updatePagination(0, 0);
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+            const start = (currentPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, filteredData.length);
+            const pageData = filteredData.slice(start, end);
+
+            resultsCount.innerHTML = `<strong>${filteredData.length.toLocaleString('fr-FR')}</strong> résultat${filteredData.length > 1 ? 's' : ''}`;
+            updatePagination(currentPage, totalPages);
+
+            let html = '<table><thead><tr>';
+            
+            // Utiliser displayColumns pour l'affichage (colonnes filtrées)
+            displayColumns.forEach(col => {
+                const isSorted = sortColumn === col;
+                const icon = isSorted ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅';
+                html += `<th class="${isSorted ? 'sorted' : ''}" data-column="${col}">${col}<span class="sort-icon">${icon}</span></th>`;
+            });
+            
+            html += '</tr></thead><tbody>';
+
+            pageData.forEach(row => {
+                html += '<tr>';
+                displayColumns.forEach(col => {
+                    let value = row[col] ?? '';
+                    const rawValue = String(value);
+                    
+                    // Highlight search term
+                    if (currentSearchTerm && value) {
+                        const regex = new RegExp(`(${escapeRegExp(currentSearchTerm)})`, 'gi');
+                        value = String(value).replace(regex, '<span class="highlight">$1</span>');
+                    }
+                    
+                    html += `<td title="${escapeHtml(rawValue)}">${value}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            tableWrapper.innerHTML = html;
+
+            // Add sort listeners
+            document.querySelectorAll('th[data-column]').forEach(th => {
+                th.addEventListener('click', () => sortData(th.dataset.column));
+            });
+
+            // Scroll vers la colonne recherchée
+            if (currentSearchColumn && currentSearchTerm) {
+                scrollToColumn(currentSearchColumn);
+            }
+        }
+
+        // Fonction pour scroller vers une colonne spécifique
+        function scrollToColumn(columnName) {
+            const th = document.querySelector(`th[data-column="${columnName}"]`);
+            if (th) {
+                // Calculer la position pour centrer la colonne
+                const tableWrapperRect = tableWrapper.getBoundingClientRect();
+                const thRect = th.getBoundingClientRect();
+                const scrollLeft = th.offsetLeft - (tableWrapperRect.width / 2) + (thRect.width / 2);
+                
+                // Scroll horizontal smooth
+                tableWrapper.scrollTo({
+                    left: Math.max(0, scrollLeft),
+                    behavior: 'smooth'
+                });
+
+                // Highlight temporaire de la colonne
+                th.classList.add('column-highlight');
+                setTimeout(() => th.classList.remove('column-highlight'), 2000);
+            }
+        }
+
+        function updatePagination(current, total) {
+            pageInfo.textContent = total > 0 ? `${current} / ${total}` : '-';
+            prevPageBtn.disabled = current <= 1;
+            nextPageBtn.disabled = current >= total;
+        }
+
+        // Export CSV
+        exportBtn.addEventListener('click', () => {
+            if (!filteredData || filteredData.length === 0) {
+                alert('Aucune donnée à exporter');
+                return;
+            }
+
+            let csv = columns.map(col => `"${col}"`).join(';') + '\n';
+
+            filteredData.forEach(row => {
+                csv += columns.map(col => {
+                    let val = row[col] ?? '';
+                    val = String(val).replace(/"/g, '""');
+                    return `"${val}"`;
+                }).join(';') + '\n';
+            });
+
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const date = new Date().toISOString().slice(0, 10);
+            link.href = URL.createObjectURL(blob);
+            link.download = `export_cencorse_${date}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        // Helpers
+        function showLoading(message) {
+            tableWrapper.innerHTML = `
+                <div class="state-message loading">
+                    <div class="spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showMessage(message, type) {
+            tableWrapper.innerHTML = `
+                <div class="state-message">
+                    <h3>${message}</h3>
+                </div>
+            `;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Init
+        loadAllData();
+    </script>
+</body>
+</html>
