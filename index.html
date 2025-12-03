@@ -498,6 +498,91 @@
             background: var(--bg-main);
         }
 
+        /* Filtres multiples */
+        .filters-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            padding: 0.5rem;
+            background: var(--bg-main);
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .filter-row:first-child {
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .filter-row .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .filter-row .form-group.search-input {
+            flex: 2;
+            min-width: 180px;
+        }
+
+        .btn-remove-filter {
+            padding: 0.4rem 0.6rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-remove-filter:hover {
+            background: #c0392b;
+        }
+
+        .btn-add-filter {
+            padding: 0.35rem 0.8rem;
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px dashed var(--primary);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 0.25rem;
+        }
+
+        .btn-add-filter:hover {
+            background: var(--primary);
+            color: white;
+            border-style: solid;
+        }
+
+        .filter-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .filter-connector {
+            font-size: 0.7rem;
+            color: var(--accent-orange);
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            background: rgba(217, 123, 42, 0.1);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
         /* Results Section */
         .results-section {
             background: var(--bg-card);
@@ -814,57 +899,61 @@
     <main>
         <section class="search-section">
             <h2>Rechercher dans la base</h2>
-            <form class="search-form" id="searchForm">
-                <div class="form-group">
-                    <label for="column">Colonne</label>
-                    <select id="column" name="column">
-                        <option value="">Choisir la colonne</option>
-                        <optgroup label="Source">
-                            <option value="source_fichier">Source fichier</option>
-                            <option value="Cadre_Acquisition">Cadre acquisition</option>
-                        </optgroup>
-                        <optgroup label="Taxonomie">
-                            <option value="nomvalide(R)">Nom scientifique</option>
-                            <option value="versionTAXREF">Version TAXREF</option>
-                        </optgroup>
-                        <optgroup label="Localisation">
-                            <option value="nomCommune">Commune</option>
-                        </optgroup>
-                        <optgroup label="Observation">
-                            <option value="observateurIdentite">Observateur</option>
-                            <option value="jourdateDebut">Date début</option>
-                            <option value="jourdateFin">Date fin</option>
-                        </optgroup>
-                        <optgroup label="Biologie">
-                            <option value="occStatutBiologique">Statut biologique</option>
-                            <option value="OccEtatBiologique">État biologique</option>
-                            <option value="occStadeDeVie">Stade de vie</option>
-                            <option value="occSexe">Sexe</option>
-                            <option value="denombrementMin">Dénombrement min</option>
-                            <option value="denombrementMax">Dénombrement max</option>
-                        </optgroup>
-                        <optgroup label="Habitat">
-                            <option value="codeHabitat">Code habitat</option>
-                            <option value="refHabitat">Référentiel habitat</option>
-                        </optgroup>
-                    </select>
+            <div class="filters-container" id="filtersContainer">
+                <!-- Premier filtre (toujours visible) -->
+                <div class="filter-row" data-filter-id="0">
+                    <div class="form-group">
+                        <label>Colonne</label>
+                        <select class="filter-column" data-filter-id="0">
+                            <option value="">Choisir la colonne</option>
+                            <optgroup label="Source">
+                                <option value="source_fichier">Source fichier</option>
+                                <option value="Cadre_Acquisition">Cadre acquisition</option>
+                            </optgroup>
+                            <optgroup label="Taxonomie">
+                                <option value="nomvalide(R)">Nom scientifique</option>
+                                <option value="versionTAXREF">Version TAXREF</option>
+                            </optgroup>
+                            <optgroup label="Localisation">
+                                <option value="nomCommune">Commune</option>
+                            </optgroup>
+                            <optgroup label="Observation">
+                                <option value="observateurIdentite">Observateur</option>
+                                <option value="jourdateDebut">Date début</option>
+                                <option value="jourdateFin">Date fin</option>
+                            </optgroup>
+                            <optgroup label="Biologie">
+                                <option value="occStatutBiologique">Statut biologique</option>
+                                <option value="OccEtatBiologique">État biologique</option>
+                                <option value="occStadeDeVie">Stade de vie</option>
+                                <option value="occSexe">Sexe</option>
+                                <option value="denombrementMin">Dénombrement min</option>
+                                <option value="denombrementMax">Dénombrement max</option>
+                            </optgroup>
+                            <optgroup label="Habitat">
+                                <option value="codeHabitat">Code habitat</option>
+                                <option value="refHabitat">Référentiel habitat</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group search-input">
+                        <label>Recherche</label>
+                        <input type="text" class="filter-search" data-filter-id="0" placeholder="Entrez votre recherche..." autocomplete="off">
+                        <div class="autocomplete-dropdown" data-filter-id="0"></div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        Rechercher
+                    </button>
+                    <button type="button" class="btn btn-reset" id="resetBtn">
+                        Réinitialiser
+                    </button>
                 </div>
-                <div class="form-group search-input">
-                    <label for="search">Recherche</label>
-                    <input type="text" id="search" name="search" placeholder="Entrez votre recherche (ou laissez vide pour tout afficher)..." autocomplete="off">
-                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    Rechercher
-                </button>
-                <button type="button" class="btn btn-reset" id="resetBtn">
-                    Réinitialiser
-                </button>
-            </form>
+            </div>
+            <button type="button" class="btn-add-filter" id="addFilterBtn">+ Ajouter un filtre</button>
         </section>
 
         <section class="results-section">
@@ -1021,10 +1110,8 @@
         let currentSearchColumn = ''; // Colonne sur laquelle on recherche
 
         // DOM Elements
-        const searchForm = document.getElementById('searchForm');
-        const columnSelect = document.getElementById('column');
-        const searchInput = document.getElementById('search');
-        const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+        const filtersContainer = document.getElementById('filtersContainer');
+        const addFilterBtn = document.getElementById('addFilterBtn');
         const tableWrapper = document.getElementById('tableWrapper');
         const resultsCount = document.getElementById('resultsCount');
         const exportBtn = document.getElementById('exportBtn');
@@ -1033,6 +1120,10 @@
         const nextPageBtn = document.getElementById('nextPage');
         const pageInfo = document.getElementById('pageInfo');
         const pageSizeSelect = document.getElementById('pageSize');
+
+        // Compteur de filtres
+        let filterCounter = 1;
+        let activeFilters = [{ id: 0, column: '', value: '' }];
 
         // Load all data on start
         async function loadAllData() {
@@ -1126,52 +1217,155 @@
 
         // Variable pour la navigation clavier
         let selectedIndex = -1;
-        let showAllSpecies = false;
+        let showAllSpecies = {};
+
+        // Template HTML pour un nouveau filtre
+        function getFilterTemplate(id) {
+            return `
+                <div class="filter-connector">ET</div>
+                <div class="filter-row" data-filter-id="${id}">
+                    <div class="form-group">
+                        <label>Colonne</label>
+                        <select class="filter-column" data-filter-id="${id}">
+                            <option value="">Choisir la colonne</option>
+                            <optgroup label="Source">
+                                <option value="source_fichier">Source fichier</option>
+                                <option value="Cadre_Acquisition">Cadre acquisition</option>
+                            </optgroup>
+                            <optgroup label="Taxonomie">
+                                <option value="nomvalide(R)">Nom scientifique</option>
+                                <option value="versionTAXREF">Version TAXREF</option>
+                            </optgroup>
+                            <optgroup label="Localisation">
+                                <option value="nomCommune">Commune</option>
+                            </optgroup>
+                            <optgroup label="Observation">
+                                <option value="observateurIdentite">Observateur</option>
+                                <option value="jourdateDebut">Date début</option>
+                                <option value="jourdateFin">Date fin</option>
+                            </optgroup>
+                            <optgroup label="Biologie">
+                                <option value="occStatutBiologique">Statut biologique</option>
+                                <option value="OccEtatBiologique">État biologique</option>
+                                <option value="occStadeDeVie">Stade de vie</option>
+                                <option value="occSexe">Sexe</option>
+                                <option value="denombrementMin">Dénombrement min</option>
+                                <option value="denombrementMax">Dénombrement max</option>
+                            </optgroup>
+                            <optgroup label="Habitat">
+                                <option value="codeHabitat">Code habitat</option>
+                                <option value="refHabitat">Référentiel habitat</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group search-input">
+                        <label>Recherche</label>
+                        <input type="text" class="filter-search" data-filter-id="${id}" placeholder="Entrez votre recherche..." autocomplete="off">
+                        <div class="autocomplete-dropdown" data-filter-id="${id}"></div>
+                    </div>
+                    <button type="button" class="btn-remove-filter" onclick="removeFilter(${id})">✕</button>
+                </div>
+            `;
+        }
+
+        // Ajouter un filtre
+        addFilterBtn.addEventListener('click', () => {
+            const newId = filterCounter++;
+            activeFilters.push({ id: newId, column: '', value: '' });
+            filtersContainer.insertAdjacentHTML('beforeend', getFilterTemplate(newId));
+            setupFilterListeners(newId);
+        });
+
+        // Supprimer un filtre
+        function removeFilter(id) {
+            const filterRow = document.querySelector(`.filter-row[data-filter-id="${id}"]`);
+            const connector = filterRow.previousElementSibling;
+            if (connector && connector.classList.contains('filter-connector')) {
+                connector.remove();
+            }
+            filterRow.remove();
+            activeFilters = activeFilters.filter(f => f.id !== id);
+            applyFilters();
+        }
+
+        // Configurer les listeners pour un filtre
+        function setupFilterListeners(filterId) {
+            const columnSelect = document.querySelector(`.filter-column[data-filter-id="${filterId}"]`);
+            const searchInput = document.querySelector(`.filter-search[data-filter-id="${filterId}"]`);
+            const dropdown = document.querySelector(`.autocomplete-dropdown[data-filter-id="${filterId}"]`);
+
+            columnSelect.addEventListener('change', () => {
+                searchInput.value = '';
+                showAllSpecies[filterId] = false;
+                dropdown.classList.remove('active');
+            });
+
+            searchInput.addEventListener('input', () => {
+                const col = columnSelect.value;
+                if (COLUMNS_WITH_SUGGESTIONS.includes(col)) {
+                    updateSuggestions(filterId, col, searchInput.value);
+                }
+            });
+
+            searchInput.addEventListener('focus', () => {
+                const col = columnSelect.value;
+                if (COLUMNS_WITH_SUGGESTIONS.includes(col)) {
+                    updateSuggestions(filterId, col, searchInput.value);
+                }
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    dropdown.classList.remove('active');
+                    applyFilters();
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialiser les listeners du premier filtre
+        setupFilterListeners(0);
 
         // Mettre à jour les suggestions dans le dropdown
-        function updateSuggestions(column, filterText = '', forceShowAll = false) {
-            autocompleteDropdown.innerHTML = '';
+        function updateSuggestions(filterId, column, filterText = '', forceShowAll = false) {
+            const dropdown = document.querySelector(`.autocomplete-dropdown[data-filter-id="${filterId}"]`);
+            const searchInput = document.querySelector(`.filter-search[data-filter-id="${filterId}"]`);
+            
+            dropdown.innerHTML = '';
             selectedIndex = -1;
             
             if (!COLUMNS_WITH_SUGGESTIONS.includes(column)) {
-                autocompleteDropdown.classList.remove('active');
+                dropdown.classList.remove('active');
                 return;
             }
 
             const values = uniqueValuesCache[column] || [];
             const filter = filterText.toLowerCase();
             
-            // Pour Nom scientifique : limiter à 50 sauf si "Voir plus" ou si on filtre
             const isSpeciesColumn = column === 'nomvalide(R)';
             const initialLimit = isSpeciesColumn && !forceShowAll && !filter ? 50 : 100;
             
-            // Filtrer
             const allFiltered = values.filter(v => !filter || v.toLowerCase().includes(filter));
             const filtered = allFiltered.slice(0, forceShowAll ? allFiltered.length : initialLimit);
             const hasMore = allFiltered.length > filtered.length;
             
             if (filtered.length === 0) {
-                autocompleteDropdown.classList.remove('active');
+                dropdown.classList.remove('active');
                 return;
             }
 
-            // Info header
             const info = document.createElement('div');
             info.className = 'autocomplete-info';
-            if (hasMore) {
-                info.textContent = `${filtered.length} affichées sur ${allFiltered.length} suggestions`;
-            } else {
-                info.textContent = `${filtered.length} suggestion${filtered.length > 1 ? 's' : ''}`;
-            }
-            autocompleteDropdown.appendChild(info);
+            info.textContent = hasMore ? `${filtered.length} affichées sur ${allFiltered.length}` : `${filtered.length} suggestion${filtered.length > 1 ? 's' : ''}`;
+            dropdown.appendChild(info);
 
-            // Items
             filtered.forEach((value, index) => {
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.dataset.index = index;
                 
-                // Highlight matching text
                 if (filter) {
                     const regex = new RegExp(`(${escapeRegExp(filter)})`, 'gi');
                     item.innerHTML = value.replace(regex, '<mark>$1</mark>');
@@ -1181,121 +1375,70 @@
                 
                 item.addEventListener('click', () => {
                     searchInput.value = value;
-                    autocompleteDropdown.classList.remove('active');
-                    showAllSpecies = false;
-                    filterData();
+                    dropdown.classList.remove('active');
+                    showAllSpecies[filterId] = false;
+                    applyFilters();
                 });
                 
-                autocompleteDropdown.appendChild(item);
+                dropdown.appendChild(item);
             });
 
-            // Bouton "Voir plus" pour Nom scientifique
             if (hasMore && isSpeciesColumn && !filter) {
                 const showMoreBtn = document.createElement('div');
                 showMoreBtn.className = 'autocomplete-show-more';
-                showMoreBtn.innerHTML = `<span>▼ Voir les ${allFiltered.length - filtered.length} autres espèces</span>`;
+                showMoreBtn.innerHTML = `<span>▼ Voir les ${allFiltered.length - filtered.length} autres</span>`;
                 showMoreBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    showAllSpecies = true;
-                    updateSuggestions(column, filterText, true);
+                    showAllSpecies[filterId] = true;
+                    updateSuggestions(filterId, column, filterText, true);
                 });
-                autocompleteDropdown.appendChild(showMoreBtn);
+                dropdown.appendChild(showMoreBtn);
             }
 
-            autocompleteDropdown.classList.add('active');
+            dropdown.classList.add('active');
         }
 
-        // Event listener pour le changement de colonne
-        columnSelect.addEventListener('change', () => {
-            const selectedColumn = columnSelect.value;
-            searchInput.value = '';
-            showAllSpecies = false;
-            autocompleteDropdown.classList.remove('active');
-        });
-
-        // Event listener pour la saisie dans le champ de recherche
-        searchInput.addEventListener('input', () => {
-            const selectedColumn = columnSelect.value;
-            if (COLUMNS_WITH_SUGGESTIONS.includes(selectedColumn)) {
-                updateSuggestions(selectedColumn, searchInput.value);
+        // Fermer les dropdowns quand on clique ailleurs
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.form-group.search-input')) {
+                document.querySelectorAll('.autocomplete-dropdown').forEach(d => d.classList.remove('active'));
             }
         });
 
-        // Focus sur le champ de recherche - afficher suggestions
-        searchInput.addEventListener('focus', () => {
-            const selectedColumn = columnSelect.value;
-            if (COLUMNS_WITH_SUGGESTIONS.includes(selectedColumn)) {
-                updateSuggestions(selectedColumn, searchInput.value);
-            }
-        });
-
-        // Navigation clavier dans les suggestions
-        searchInput.addEventListener('keydown', (e) => {
-            const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
-            if (!items.length) return;
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                updateSelectedItem(items);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, 0);
-                updateSelectedItem(items);
-            } else if (e.key === 'Enter' && selectedIndex >= 0) {
-                e.preventDefault();
-                items[selectedIndex].click();
-            } else if (e.key === 'Escape') {
-                autocompleteDropdown.classList.remove('active');
-            }
-        });
-
-        function updateSelectedItem(items) {
-            items.forEach((item, i) => {
-                item.classList.toggle('selected', i === selectedIndex);
-                if (i === selectedIndex) {
-                    item.scrollIntoView({ block: 'nearest' });
+        // Appliquer tous les filtres
+        function applyFilters() {
+            // Collecter tous les filtres actifs
+            const filters = [];
+            document.querySelectorAll('.filter-row').forEach(row => {
+                const id = row.dataset.filterId;
+                const column = row.querySelector('.filter-column').value;
+                const value = row.querySelector('.filter-search').value.trim().toLowerCase();
+                if (value) {
+                    filters.push({ column, value });
                 }
             });
-        }
 
-        // Fermer le dropdown quand on clique ailleurs
-        document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !autocompleteDropdown.contains(e.target)) {
-                autocompleteDropdown.classList.remove('active');
-            }
-        });
+            currentSearchTerm = filters.length > 0 ? filters[0].value : '';
+            currentSearchColumn = filters.length > 0 && filters[0].column ? filters[0].column : '';
 
-        // Search/Filter
-        searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            filterData();
-        });
-
-        function filterData() {
-            const column = columnSelect.value;
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            currentSearchTerm = searchTerm;
-            currentSearchColumn = column; // Sauvegarder la colonne de recherche
-
-            if (!searchTerm) {
+            if (filters.length === 0) {
                 filteredData = [...allData];
-                currentSearchColumn = ''; // Pas de scroll si pas de recherche
-            } else if (column) {
-                filteredData = allData.filter(row => {
-                    const val = row[column];
-                    return val && String(val).toLowerCase().includes(searchTerm);
-                });
             } else {
-                // Search in main columns
-                const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
                 filteredData = allData.filter(row => {
-                    return searchCols.some(col => {
-                        const val = row[col];
-                        return val && String(val).toLowerCase().includes(searchTerm);
+                    return filters.every(filter => {
+                        if (filter.column) {
+                            const val = row[filter.column];
+                            return val && String(val).toLowerCase().includes(filter.value);
+                        } else {
+                            // Recherche globale
+                            const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
+                            return searchCols.some(col => {
+                                const val = row[col];
+                                return val && String(val).toLowerCase().includes(filter.value);
+                            });
+                        }
                     });
                 });
-                currentSearchColumn = ''; // Pas de scroll pour recherche globale
             }
 
             currentPage = 1;
@@ -1304,16 +1447,39 @@
 
         // Reset
         resetBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            columnSelect.value = '';
+            // Supprimer tous les filtres sauf le premier
+            document.querySelectorAll('.filter-row').forEach((row, index) => {
+                if (index > 0) {
+                    const connector = row.previousElementSibling;
+                    if (connector && connector.classList.contains('filter-connector')) {
+                        connector.remove();
+                    }
+                    row.remove();
+                }
+            });
+            
+            // Réinitialiser le premier filtre
+            const firstColumn = document.querySelector('.filter-column[data-filter-id="0"]');
+            const firstSearch = document.querySelector('.filter-search[data-filter-id="0"]');
+            const firstDropdown = document.querySelector('.autocomplete-dropdown[data-filter-id="0"]');
+            
+            if (firstColumn) firstColumn.value = '';
+            if (firstSearch) firstSearch.value = '';
+            if (firstDropdown) {
+                firstDropdown.classList.remove('active');
+                firstDropdown.innerHTML = '';
+            }
+            
+            activeFilters = [{ id: 0, column: '', value: '' }];
+            filterCounter = 1;
             currentSearchTerm = '';
             currentSearchColumn = '';
             filteredData = [...allData];
             currentPage = 1;
             sortColumn = null;
             sortDirection = 'asc';
-            autocompleteDropdown.classList.remove('active');
-            autocompleteDropdown.innerHTML = '';
+            showAllSpecies = {};
+            
             // Scroll retour au début
             tableWrapper.scrollTo({ left: 0, behavior: 'smooth' });
             displayResults();
