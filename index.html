@@ -1078,16 +1078,15 @@
             color: var(--text-primary);
         }
 
-        /* Observer filter input */
-        .observer-input-wrapper {
+        /* Map Observer Autocomplete */
+        .map-autocomplete-wrapper {
             position: relative;
-            display: inline-flex;
-            align-items: center;
+            display: inline-block;
         }
 
-        .observer-input-wrapper input {
-            width: 130px;
-            padding: 0.35rem 0.6rem 0.35rem 0.5rem;
+        .map-autocomplete-wrapper input {
+            width: 160px;
+            padding: 0.35rem 0.6rem;
             border: 1px solid var(--border);
             border-radius: 5px;
             font-size: 0.75rem;
@@ -1097,38 +1096,91 @@
             transition: all 0.2s ease;
         }
 
-        .observer-input-wrapper input::placeholder {
+        .map-autocomplete-wrapper input::placeholder {
             color: var(--text-muted);
             font-style: italic;
+            font-size: 0.7rem;
         }
 
-        .observer-input-wrapper input:focus {
+        .map-autocomplete-wrapper input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(26, 95, 74, 0.15);
+            box-shadow: 0 0 0 2px rgba(26, 95, 74, 0.12);
+            background: white;
         }
 
-        .observer-input-wrapper input:not(:placeholder-shown) {
+        .map-autocomplete-wrapper input.has-value {
             border-color: var(--primary);
             background: rgba(26, 95, 74, 0.03);
-            padding-right: 1.5rem;
         }
 
-        .observer-indicator {
+        .map-autocomplete-dropdown {
+            display: none;
             position: absolute;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.2s ease;
+            top: 100%;
+            left: 0;
+            width: 220px;
+            background: white;
+            border: 1px solid var(--primary-light);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 6px 20px rgba(26, 95, 74, 0.15);
         }
 
-        .observer-input-wrapper input:not(:placeholder-shown) + .observer-indicator {
-            opacity: 1;
-            transform: scale(1);
+        .map-autocomplete-dropdown.active {
+            display: block;
+        }
+
+        .map-autocomplete-item {
+            padding: 0.5rem 0.7rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.12s ease;
+        }
+
+        .map-autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .map-autocomplete-item:hover,
+        .map-autocomplete-item.selected {
+            background: linear-gradient(to right, rgba(26, 95, 74, 0.1), rgba(26, 95, 74, 0.03));
+            color: var(--primary-dark);
+        }
+
+        .map-autocomplete-item mark {
+            background: rgba(217, 123, 42, 0.3);
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: 500;
+        }
+
+        .map-autocomplete-info {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: var(--bg-main);
+            font-style: italic;
+            text-align: center;
+        }
+
+        .map-autocomplete-dropdown::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .map-autocomplete-dropdown::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        .map-autocomplete-dropdown::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
         }
 
         .map-stats {
@@ -1453,11 +1505,10 @@
                         </div>
                         <div class="map-control-group observer-filter">
                             <label>Observateur :</label>
-                            <div class="observer-input-wrapper">
-                                <input type="text" id="mapObserverFilter" list="observersList" placeholder="Taper un nom...">
-                                <span class="observer-indicator"></span>
+                            <div class="map-autocomplete-wrapper">
+                                <input type="text" id="mapObserverFilter" placeholder="Rechercher..." autocomplete="off">
+                                <div class="map-autocomplete-dropdown" id="observerDropdown"></div>
                             </div>
-                            <datalist id="observersList"></datalist>
                         </div>
                         <div class="map-control-group">
                             <label>Espèce :</label>
@@ -1634,7 +1685,7 @@
                         
                         // Mise à jour de la progression
                         const progress = Math.min(85, (allResults.length / estimatedTotal) * 80 + 10);
-                        updateLoadingProgress(progress, `${allResults.toLocaleString('fr-FR')} observations chargées...`);
+                        updateLoadingProgress(progress, `${allResults.length.toLocaleString('fr-FR')} observations chargées...`);
                         
                         if (data.length < batchSize) hasMore = false;
                     } else {
@@ -1943,6 +1994,11 @@
 
             currentPage = 1;
             displayResults();
+            
+            // Synchroniser avec la carte si elle est initialisée
+            if (typeof map !== 'undefined' && map) {
+                applyMapFilters();
+            }
         }
 
         // Reset
@@ -1983,6 +2039,21 @@
             // Scroll retour au début
             tableWrapper.scrollTo({ left: 0, behavior: 'smooth' });
             displayResults();
+            
+            // Synchroniser avec la carte si elle est initialisée
+            if (typeof map !== 'undefined' && map) {
+                // Reset aussi les filtres de la carte
+                document.getElementById('mapProjectFilter').value = '';
+                const obsInput = document.getElementById('mapObserverFilter');
+                if (obsInput) {
+                    obsInput.value = '';
+                    obsInput.classList.remove('has-value');
+                }
+                document.getElementById('mapSpeciesFilter').value = '';
+                const dropdown = document.getElementById('observerDropdown');
+                if (dropdown) dropdown.classList.remove('active');
+                loadMapPoints();
+            }
         });
 
         // Sort
@@ -2272,15 +2343,21 @@
 
             // Event listeners pour les filtres
             document.getElementById('mapProjectFilter').addEventListener('change', applyMapFilters);
-            document.getElementById('mapObserverFilter').addEventListener('input', applyMapFilters);
             document.getElementById('mapSpeciesFilter').addEventListener('change', applyMapFilters);
             
-            // Reset des filtres
+            // Setup autocomplete pour observateur
+            setupMapObserverAutocomplete();
+            
+            // Reset des filtres de la carte
             document.getElementById('resetMapFilters').addEventListener('click', () => {
                 document.getElementById('mapProjectFilter').value = '';
-                document.getElementById('mapObserverFilter').value = '';
+                const obsInput = document.getElementById('mapObserverFilter');
+                obsInput.value = '';
+                obsInput.classList.remove('has-value');
                 document.getElementById('mapSpeciesFilter').value = '';
-                loadMapPoints();
+                document.getElementById('observerDropdown').classList.remove('active');
+                // Réappliquer les filtres (sans les filtres carte, donc juste les filtres recherche)
+                applyMapFilters();
             });
         }
 
@@ -2288,29 +2365,71 @@
             const projectFilter = document.getElementById('mapProjectFilter').value;
             const observerFilter = document.getElementById('mapObserverFilter').value;
             const speciesFilter = document.getElementById('mapSpeciesFilter').value;
-            loadMapPoints(projectFilter, observerFilter, speciesFilter);
-        }
-
-        function loadMapPoints(projectFilter = '', observerFilter = '', speciesFilter = '') {
-            markers.clearLayers();
             
-            let pointCount = 0;
-            let dataToShow = allData;
+            // Appliquer les filtres de la carte sur filteredData ET mettre à jour la table
+            // Partir des données de base filtrées par la recherche
+            let baseData = allData;
             
+            // Récupérer les filtres de recherche actifs
+            const searchFilters = [];
+            document.querySelectorAll('.filter-row').forEach(row => {
+                const column = row.querySelector('.filter-column').value;
+                const value = row.querySelector('.filter-search').value.trim().toLowerCase();
+                if (value) {
+                    searchFilters.push({ column, value });
+                }
+            });
+            
+            // Appliquer les filtres de recherche
+            if (searchFilters.length > 0) {
+                baseData = baseData.filter(row => {
+                    return searchFilters.every(filter => {
+                        if (filter.column) {
+                            const val = row[filter.column];
+                            return val && String(val).toLowerCase().includes(filter.value);
+                        } else {
+                            const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
+                            return searchCols.some(col => {
+                                const val = row[col];
+                                return val && String(val).toLowerCase().includes(filter.value);
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // Appliquer les filtres de la carte
             if (projectFilter) {
-                dataToShow = dataToShow.filter(row => row['Cadre_Acquisition'] === projectFilter);
+                baseData = baseData.filter(row => row['Cadre_Acquisition'] === projectFilter);
             }
             if (observerFilter) {
-                // Recherche partielle pour l'observateur (contient le nom)
                 const searchTerm = observerFilter.toLowerCase();
-                dataToShow = dataToShow.filter(row => {
+                baseData = baseData.filter(row => {
                     const obs = row['observateurIdentite'];
                     return obs && obs.toLowerCase().includes(searchTerm);
                 });
             }
             if (speciesFilter) {
-                dataToShow = dataToShow.filter(row => row['nomCite'] === speciesFilter || row['nomvalide(R)'] === speciesFilter);
+                baseData = baseData.filter(row => row['nomCite'] === speciesFilter || row['nomvalide(R)'] === speciesFilter);
             }
+            
+            // Mettre à jour filteredData
+            filteredData = baseData;
+            
+            // Mettre à jour la table
+            currentPage = 1;
+            displayResults();
+            
+            // Mettre à jour la carte
+            loadMapPoints();
+        }
+
+        function loadMapPoints() {
+            markers.clearLayers();
+            
+            let pointCount = 0;
+            // Utiliser directement filteredData (déjà filtré par recherche + filtres carte)
+            let dataToShow = filteredData;
 
             dataToShow.forEach(row => {
                 const x = parseFloat(row['Longitude (coordonnée x)']);
@@ -2368,6 +2487,9 @@
             document.getElementById('mapStats').innerHTML = `<strong>${pointCount.toLocaleString('fr-FR')}</strong> observations géolocalisées`;
         }
 
+        // Liste des observateurs pour l'autocomplete
+        let mapObserversList = [];
+
         function populateMapFilters() {
             // Projets
             const projectSelect = document.getElementById('mapProjectFilter');
@@ -2389,18 +2511,13 @@
                 projectSelect.appendChild(option);
             });
 
-            // Observateurs (datalist pour suggestions)
-            const observersList = document.getElementById('observersList');
+            // Observateurs - construire la liste pour l'autocomplete
             const observers = new Set();
             allData.forEach(row => {
                 const observer = row['observateurIdentite'];
                 if (observer) observers.add(observer);
             });
-            Array.from(observers).sort((a, b) => a.localeCompare(b)).forEach(observer => {
-                const option = document.createElement('option');
-                option.value = observer;
-                observersList.appendChild(option);
-            });
+            mapObserversList = Array.from(observers).sort((a, b) => a.localeCompare(b));
 
             // Espèces
             const speciesSelect = document.getElementById('mapSpeciesFilter');
@@ -2415,6 +2532,108 @@
                 option.textContent = sp.length > 35 ? sp.substring(0, 35) + '...' : sp;
                 option.title = sp;
                 speciesSelect.appendChild(option);
+            });
+        }
+
+        function setupMapObserverAutocomplete() {
+            const input = document.getElementById('mapObserverFilter');
+            const dropdown = document.getElementById('observerDropdown');
+            let selectedIdx = -1;
+
+            function renderSuggestions(filter = '') {
+                const filterLower = filter.toLowerCase();
+                let matches = mapObserversList;
+                
+                if (filter.length > 0) {
+                    matches = mapObserversList.filter(obs => 
+                        obs.toLowerCase().includes(filterLower)
+                    );
+                }
+
+                // Limiter à 50 résultats
+                const displayMatches = matches.slice(0, 50);
+
+                if (displayMatches.length === 0) {
+                    dropdown.innerHTML = '<div class="map-autocomplete-info">Aucun résultat</div>';
+                    dropdown.classList.add('active');
+                    return;
+                }
+
+                let html = '';
+                if (filter.length === 0) {
+                    html += `<div class="map-autocomplete-info">${mapObserversList.length} observateurs disponibles</div>`;
+                } else {
+                    html += `<div class="map-autocomplete-info">${matches.length} résultat${matches.length > 1 ? 's' : ''}</div>`;
+                }
+
+                displayMatches.forEach((obs, idx) => {
+                    let displayText = obs;
+                    if (filter.length > 0) {
+                        const regex = new RegExp(`(${filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                        displayText = obs.replace(regex, '<mark>$1</mark>');
+                    }
+                    html += `<div class="map-autocomplete-item${idx === selectedIdx ? ' selected' : ''}" data-value="${obs}">${displayText}</div>`;
+                });
+
+                dropdown.innerHTML = html;
+                dropdown.classList.add('active');
+                selectedIdx = -1;
+            }
+
+            // Event: input
+            input.addEventListener('input', () => {
+                renderSuggestions(input.value);
+                input.classList.toggle('has-value', input.value.length > 0);
+            });
+
+            // Event: focus
+            input.addEventListener('focus', () => {
+                renderSuggestions(input.value);
+            });
+
+            // Event: click sur item
+            dropdown.addEventListener('click', (e) => {
+                const item = e.target.closest('.map-autocomplete-item');
+                if (item) {
+                    input.value = item.dataset.value;
+                    input.classList.add('has-value');
+                    dropdown.classList.remove('active');
+                    applyMapFilters();
+                }
+            });
+
+            // Event: navigation clavier
+            input.addEventListener('keydown', (e) => {
+                const items = dropdown.querySelectorAll('.map-autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIdx = Math.min(selectedIdx + 1, items.length - 1);
+                    items.forEach((item, i) => item.classList.toggle('selected', i === selectedIdx));
+                    if (items[selectedIdx]) items[selectedIdx].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIdx = Math.max(selectedIdx - 1, 0);
+                    items.forEach((item, i) => item.classList.toggle('selected', i === selectedIdx));
+                    if (items[selectedIdx]) items[selectedIdx].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIdx >= 0 && items[selectedIdx]) {
+                        input.value = items[selectedIdx].dataset.value;
+                        input.classList.add('has-value');
+                        dropdown.classList.remove('active');
+                    }
+                    applyMapFilters();
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.remove('active');
+                }
+            });
+
+            // Event: clic extérieur
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.map-autocomplete-wrapper')) {
+                    dropdown.classList.remove('active');
+                }
             });
         }
 
