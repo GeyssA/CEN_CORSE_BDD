@@ -1,0 +1,9 @@
+# Données taxonomiques volumineuses (> limite GitHub 100 Mo ou déconseillé > 50 Mo)
+taxon-lookup.min.js
+taxon-lookup.min.json
+taxon.txt
+taxon_ref.csv
+
+# Optionnel si tes exports sont aussi très gros :
+# vernacularname.txt
+# vernacularname.csv

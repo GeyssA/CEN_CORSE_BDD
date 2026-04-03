@@ -8,9 +8,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Pas de taxon-lookup.min.js ici : fichier énorme (~100 Mo+) bloque tout l’affichage.
+         Les taxons sont chargés en async via taxon-lookup.min.json dans loadTaxonLookup(). -->
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <!-- Proj4 pour conversion Lambert 93 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.min.js"></script>
     <!-- Leaflet MarkerCluster -->
@@ -19,21 +23,21 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <style>
         :root {
-            --primary: #1a5f4a;
-            --primary-dark: #0d3d2e;
-            --primary-light: #2d8a6b;
-            --accent-blue: #2a6495;
-            --accent-orange: #d97b2a;
-            --bg-main: #f7f9f8;
+            --primary: #1f4c7a;
+            --primary-dark: #0f2744;
+            --primary-light: #3d6fa3;
+            --accent-blue: #5f91c4;
+            --accent-orange: #5d84b8;
+            --bg-main: #f3f7fc;
             --bg-card: #ffffff;
-            --text-primary: #1a2e28;
-            --text-secondary: #4a5d56;
-            --text-muted: #7a8b85;
-            --border: #d4e0db;
-            --border-light: #e8efec;
-            --shadow-sm: 0 1px 3px rgba(26, 95, 74, 0.08);
-            --shadow-md: 0 4px 12px rgba(26, 95, 74, 0.1);
-            --shadow-lg: 0 8px 30px rgba(26, 95, 74, 0.12);
+            --text-primary: #12263a;
+            --text-secondary: #3f5268;
+            --text-muted: #6d7f92;
+            --border: #cfd9e6;
+            --border-light: #e6edf5;
+            --shadow-sm: 0 1px 3px rgba(15, 39, 68, 0.08);
+            --shadow-md: 0 4px 12px rgba(15, 39, 68, 0.1);
+            --shadow-lg: 0 8px 30px rgba(15, 39, 68, 0.14);
         }
 
         /* ========== LOGIN SCREEN ========== */
@@ -340,7 +344,7 @@
         /* Header */
         header {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
-            padding: 0.6rem 1.5rem;
+            padding: 0.35rem 1rem;
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
@@ -350,7 +354,7 @@
         .geo-shape {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.12;
+            opacity: 0.06;
             pointer-events: none;
         }
 
@@ -373,40 +377,40 @@
         }
 
         .logo {
-            height: 45px;
+            height: 34px;
             width: auto;
             background: white;
-            padding: 5px 8px;
+            padding: 3px 6px;
             border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         .header-text h1 {
             color: white;
-            font-size: 1.15rem;
+            font-size: 0.98rem;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
 
         .header-text p {
             color: rgba(255,255,255,0.85);
-            font-size: 0.75rem;
+            font-size: 0.68rem;
         }
 
         /* Main Container */
         main {
             max-width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem;
         }
 
         /* Search Section */
         .search-section {
             background: var(--bg-card);
             border-radius: 8px;
-            padding: 0.75rem 1rem;
+            padding: 0.55rem 0.8rem;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-light);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .search-section h2 {
@@ -790,7 +794,7 @@
         .table-wrapper {
             overflow-x: auto;
             overflow-y: auto;
-            height: calc(100vh - 380px);
+            height: calc(100vh - 320px);
             min-height: 250px;
             max-height: 600px;
             border-radius: 0 0 8px 8px;
@@ -798,7 +802,7 @@
 
         @media (max-height: 700px) {
             .table-wrapper {
-                height: calc(100vh - 320px);
+                height: calc(100vh - 275px);
                 min-height: 200px;
             }
         }
@@ -827,6 +831,25 @@
             cursor: pointer;
             user-select: none;
             position: relative;
+        }
+
+        th.resizable {
+            padding-right: 12px;
+        }
+
+        .col-resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+            cursor: col-resize;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .col-resizer:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
 
         th:hover {
@@ -925,10 +948,7 @@
 
         /* Footer */
         footer {
-            text-align: center;
-            padding: 0.75rem;
-            color: var(--text-muted);
-            font-size: 0.7rem;
+            display: none;
         }
 
         /* Scrollbar */
@@ -967,21 +987,21 @@
         .tabs-nav {
             display: flex;
             gap: 0;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             background: var(--bg-card);
             border-radius: 8px;
-            padding: 0.25rem;
+            padding: 0.2rem;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-light);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 0.5rem 1rem;
+            padding: 0.38rem 0.8rem;
             border: none;
             background: transparent;
             color: var(--text-secondary);
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
@@ -1007,6 +1027,58 @@
         .tab-btn svg {
             width: 16px;
             height: 16px;
+        }
+
+        /* Sous-onglets vue tableau (SINP / lisible) */
+        .view-mode-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.45rem;
+            padding: 0.15rem 0;
+        }
+
+        .view-mode-nav {
+            display: inline-flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 3px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-mode-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            font-family: inherit;
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .view-mode-btn:hover {
+            color: var(--primary);
+            background: var(--bg-main);
+        }
+
+        .view-mode-btn.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            box-shadow: 0 2px 8px rgba(26, 95, 74, 0.25);
+        }
+
+        .view-mode-hint {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-style: italic;
+            max-width: 420px;
+            line-height: 1.35;
         }
 
         .tab-content {
@@ -1037,6 +1109,7 @@
             box-shadow: 0 4px 20px rgba(26, 95, 74, 0.12);
             border: 1px solid var(--border);
             overflow: hidden;
+            min-height: calc(100vh - 135px);
         }
 
         .map-header {
@@ -1193,17 +1266,16 @@
         }
 
         #map {
-            height: calc(100vh - 280px);
-            min-height: 350px;
-            max-height: 700px;
+            flex: 1;
+            height: auto;
+            min-height: 300px;
             width: 100%;
             background: var(--bg-main);
         }
 
         @media (max-height: 700px) {
             #map {
-                height: calc(100vh - 240px);
-                min-height: 300px;
+                min-height: 240px;
             }
         }
 
@@ -1216,6 +1288,19 @@
         .leaflet-popup-content {
             margin: 0;
             padding: 0;
+        }
+
+        .leaflet-draw-toolbar a {
+            background-color: var(--bg-card);
+            border-color: var(--border);
+        }
+
+        .leaflet-draw-toolbar a:hover {
+            background-color: var(--border-light);
+        }
+
+        .leaflet-top.leaflet-right .leaflet-draw-toolbar {
+            margin-top: 0;
         }
 
         .popup-content {
@@ -1287,6 +1372,31 @@
             background: rgba(217, 123, 42, 0.3);
             padding: 0 0.1em;
             border-radius: 2px;
+        }
+
+        .bool-badge {
+            display: inline-block;
+            min-width: 56px;
+            text-align: center;
+            padding: 0.12rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .bool-badge.true {
+            background: #d8f6df;
+            color: #0f6b2f;
+            border-color: #81d39b;
+        }
+
+        .bool-badge.false {
+            background: #ffe0e0;
+            color: #9b1c1c;
+            border-color: #f3a2a2;
         }
 
         .loading-info {
@@ -1364,7 +1474,7 @@
         <div class="header-content">
             <img src="Logo_CENCorse-removebg-preview.png" alt="Logo CEN Corse" class="logo">
             <div class="header-text">
-                <h1>Base de données interne - format SINP</h1>
+                <h1>Base de données interne</h1>
                 <p>Conservatoire d'Espaces Naturels de Corse</p>
             </div>
         </div>
@@ -1403,6 +1513,7 @@
                             <optgroup label="Source">
                                 <option value="source_fichier">Source fichier</option>
                                 <option value="Cadre_Acquisition">Cadre acquisition</option>
+                                <option value="envoye_national">Envoyé national</option>
                             </optgroup>
                             <optgroup label="Taxonomie">
                                 <option value="nomvalide(R)">Nom scientifique</option>
@@ -1450,10 +1561,18 @@
             <button type="button" class="btn-add-filter" id="addFilterBtn">+ Ajouter un filtre</button>
         </section>
 
+        <div class="view-mode-bar">
+            <div class="view-mode-nav" role="tablist" aria-label="Mode d'affichage du tableau">
+                <button type="button" class="view-mode-btn active" data-table-view="readable" id="viewModeReadable">Vue lisible</button>
+                <button type="button" class="view-mode-btn" data-table-view="sinp" id="viewModeSinp">Vue SINP</button>
+            </div>
+            <p class="view-mode-hint" id="viewModeHint"></p>
+        </div>
+
         <section class="results-section">
             <div class="results-header">
                 <span class="results-count" id="resultsCount">Chargement...</span>
-                <span class="results-info">Pour faciliter la lecture, certaines colonnes ne sont pas affichées. Lors de l'export CSV au format SINP, toutes les colonnes seront bien présentes.</span>
+                <span class="results-info" id="resultsInfoText"></span>
                 <div class="results-actions">
                     <div class="pagination" id="pagination">
                         <button id="prevPage" disabled>◄ Préc.</button>
@@ -1503,6 +1622,12 @@
                                 <option value="">Tous</option>
                             </select>
                         </div>
+                        <div class="map-control-group">
+                            <label>Année :</label>
+                            <select id="mapYearFilter">
+                                <option value="">Toutes</option>
+                            </select>
+                        </div>
                         <div class="map-control-group observer-filter">
                             <label>Observateur :</label>
                             <div class="map-autocomplete-wrapper">
@@ -1515,6 +1640,16 @@
                             <select id="mapSpeciesFilter">
                                 <option value="">Toutes</option>
                             </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label>Groupe :</label>
+                            <select id="mapGroupFilter">
+                                <option value="">Tous</option>
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label>Zone carte :</label>
+                            <button type="button" class="btn btn-secondary" id="clearMapDrawZone" style="padding: 0.3rem 0.55rem; font-size: 0.7rem;" title="Supprimer le polygone ou rectangle dessiné">Effacer la zone</button>
                         </div>
                         <button class="btn btn-reset" id="resetMapFilters" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">Réinitialiser</button>
                     </div>
@@ -1596,7 +1731,12 @@
         // Configuration Supabase
         const SUPABASE_URL = 'https://yzkgwctbtdmuelrvflrz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6a2d3Y3RidGRtdWVscnZmbHJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2MDk5NzYsImV4cCI6MjA4MDE4NTk3Nn0.U62M1GiFSsr3e44beKdUS5FWsS7ch2O43KXicGGri8w';
-        const TABLE_NAME = 'CENCORSE_BDD';
+        const TABLE_NAME_SINP = 'CENCORSE_BDD';
+        const TABLE_NAME_READABLE = 'cen_corse_lisible';
+        /** Noms vernaculaires TaxRef : colonne id = même référence que cdNom (scientificNameID) */
+        const TABLE_NAME_VERNACULAR = 'vernacularname';
+        /** Référentiel importé depuis taxon_ref.csv : colonne scientificnameid */
+        const TABLE_NAME_TAXON_REF = 'taxon_ref';
 
         // Initialiser Supabase
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1620,21 +1760,121 @@
             'preuveExistante', 'preuveNumerique', 'preuveNonNumerique', 'Commentaire Preuve'
         ];
 
-        // Colonnes avec liste déroulante de suggestions
-        const COLUMNS_WITH_SUGGESTIONS = [
+        const SINP_FILTER_GROUPS = [
+            {
+                label: 'Source',
+                options: [
+                    { value: 'source_fichier', label: 'Source fichier' },
+                    { value: 'Cadre_Acquisition', label: 'Cadre acquisition' },
+                    { value: 'envoye_national', label: 'Envoyé national' }
+                ]
+            },
+            {
+                label: 'Taxonomie',
+                options: [
+                    { value: 'nomvalide(R)', label: 'Nom scientifique' },
+                    { value: 'versionTAXREF', label: 'Version TAXREF' }
+                ]
+            },
+            {
+                label: 'Localisation',
+                options: [{ value: 'nomCommune', label: 'Commune' }]
+            },
+            {
+                label: 'Observation',
+                options: [
+                    { value: 'observateurIdentite', label: 'Observateur' },
+                    { value: 'jourdateDebut', label: 'Date début' },
+                    { value: 'jourdateFin', label: 'Date fin' }
+                ]
+            },
+            {
+                label: 'Biologie',
+                options: [
+                    { value: 'occStatutBiologique', label: 'Statut biologique' },
+                    { value: 'OccEtatBiologique', label: 'État biologique' },
+                    { value: 'occStadeDeVie', label: 'Stade de vie' },
+                    { value: 'occSexe', label: 'Sexe' },
+                    { value: 'denombrementMin', label: 'Dénombrement min' },
+                    { value: 'denombrementMax', label: 'Dénombrement max' }
+                ]
+            }
+        ];
+
+        const READABLE_FILTER_GROUPS = [
+            {
+                label: 'Source',
+                options: [
+                    { value: 'SOURCE_FICHIER', label: 'Source fichier' },
+                    { value: 'CADRE_ACQU', label: 'Cadre acquisition' },
+                    { value: 'ENVOYE_NATIONAL', label: 'Envoyé national' }
+                ]
+            },
+            {
+                label: 'Taxonomie',
+                options: [
+                    { value: 'NOM_TAXON', label: 'Nom taxon' },
+                    { value: 'NOM_VERNACULAIRE', label: 'Nom vernaculaire' },
+                    { value: 'GROUPE', label: 'Groupe' }
+                ]
+            },
+            {
+                label: 'Observation',
+                options: [
+                    { value: 'OBS', label: 'Observateur' },
+                    { value: 'ANNEE', label: 'Année' },
+                    { value: 'DATE', label: 'Date' },
+                    { value: 'HEURE', label: 'Heure' },
+                    { value: 'COMMUNE', label: 'Commune' }
+                ]
+            }
+        ];
+
+        // Colonnes avec suggestions
+        const COLUMNS_WITH_SUGGESTIONS_SINP = [
             'source_fichier',
-            'Cadre_Acquisition', 
+            'Cadre_Acquisition',
+            'envoye_national',
             'nomCommune',
             'nomvalide(R)',
             'observateurIdentite'
         ];
 
+        const COLUMNS_WITH_SUGGESTIONS_READABLE = [
+            'SOURCE_FICHIER',
+            'CADRE_ACQU',
+            'ENVOYE_NATIONAL',
+            'COMMUNE',
+            'NOM_TAXON',
+            'NOM_VERNACULAIRE',
+            'OBS',
+            'GROUPE'
+        ];
+
         // Cache des valeurs uniques par colonne
         let uniqueValuesCache = {};
+        let uniqueValuesCacheReadable = {};
 
         // State
         let allData = [];
         let filteredData = [];
+        let readableById = new Map();
+        let readableData = [];
+        let sinpById = new Map();
+        /** clé = cdNom (string), valeur = nom vernaculaire (français, 1er synonyme) — uniquement si id ∈ taxon_ref */
+        let vernacularByCdNom = new Map();
+        /** scientificnameid présents dans taxon_ref (même clé que cdNom / id côté vernacularname) */
+        let taxonRefScientificIds = new Set();
+        /** sous-espèce / synonyme → taxon accepté (acceptednameusageid ≠ scientificnameid) */
+        let taxonRefAcceptedByScientificId = new Map();
+        /** scientificnameid → acceptednameusageid tel que dans taxon_ref (colonne du CSV) */
+        let taxonRefAcceptedNameUsageByScientificId = new Map();
+        /** acceptednameusageid → ensemble de scientificnameid du même « groupe » */
+        let taxonRefMembersByAccepted = new Map();
+        /** vernaculaire issu de la colonne vernacularname de taxon_ref */
+        let taxonRefVernacularById = new Map();
+        /** par groupe d’espèce acceptée : premier vernaculaire trouvé parmi les membres */
+        let taxonRefGroupVernacular = new Map();
         let currentPage = 1;
         let pageSize = 100;
         let sortColumn = null;
@@ -1643,6 +1883,793 @@
         let displayColumns = []; // Colonnes visibles (sans les masquées)
         let currentSearchTerm = '';
         let currentSearchColumn = ''; // Colonne sur laquelle on recherche
+        let columnWidths = {};
+        /** 'sinp' | 'readable' */
+        let tableViewMode = 'readable';
+
+        // Vue lisible : ordre des colonnes (équivalent pré-SINP / script R)
+        const READABLE_COLUMN_ORDER = [
+            'ENVOYE_NATIONAL',
+            'IDENTIFIANTORIGINE',
+            'SOURCE_FICHIER',
+            'CADRE_ACQU',
+            'OBS',
+            'ANNEE',
+            'DATE',
+            'HEURE',
+            'COMMUNE',
+            'COM_LOCAL',
+            'PROTOCOLE',
+            'GROUPE',
+            'NOM_TAXON',
+            'NOM_VERNACULAIRE',
+            'ETAT_BIO',
+            'STADE_AGE',
+            'TYPE',
+            'EFFECTIF',
+            'SEXE',
+            'COMPORTEME',
+            'DESCRIPTI',
+            'RMQ',
+            'X_L93',
+            'Y_L93'
+        ];
+
+        const MAP_OCC_ETAT_BIO_TO_SOURCE = {
+            '1': 'vivant',
+            '0': 'mort'
+        };
+
+        const MAP_OCC_STADE_TO_SOURCE = {
+            '0': 'NR',
+            '1': 'Non déterminable',
+            '2': 'Adulte',
+            '3': 'Juvénile',
+            '5': 'Sub-adulte',
+            '6': 'Larve',
+            '9': 'Oeuf',
+            '10': 'Mue',
+            '11': 'Exuviation',
+            '13': 'Nymphe',
+            '18': 'Germination',
+            '19': 'Fané',
+            '20': 'Graine',
+            '21': 'Thalle, protothalle',
+            '22': 'Tubercule',
+            '23': 'Bulbe',
+            '24': 'Rhizome'
+        };
+
+        const MAP_OBJET_DENOMBREMENT_TO_TYPE = {
+            'IND': 'Individu',
+            'COL': 'Colonie',
+            'NID': 'Nid',
+            'CPL': 'Couple',
+            'PON': 'Ponte',
+            'HAM': 'Hampe florale'
+        };
+
+        const MAP_OCC_SEXE_TO_SOURCE = {
+            '0': 'Non renseigné',
+            '1': 'Ind',
+            '2': 'Femelle',
+            '3': 'Male',
+            '4': 'Hermaphrodite',
+            '5': 'Mixte'
+        };
+
+        const MAP_OCC_STATUT_BIO_TO_COMPORTEME = {
+            '2': 'Non déterminable',
+            '3': 'Reproduction',
+            '4': 'Hibernation',
+            '5': 'Estivation',
+            '6': 'Halte migratoire',
+            '7': 'Swarming',
+            '8': 'Chasse-alimentation',
+            '9': 'Pas de reproduction',
+            '10': 'Passage en vol',
+            '11': 'Erratique',
+            '12': 'Sédentaire'
+        };
+
+        const taxonByScientificName = new Map();
+        const taxonByScientificNameId = new Map();
+        let taxonLookupLoadError = '';
+
+        function normalizeTaxonName(s) {
+            return String(s ?? '')
+                .trim()
+                .toLowerCase()
+                .replace(/\.$/, '');
+        }
+
+        function normalizeVernacular(s) {
+            if (!s || !String(s).trim()) return '';
+            return String(s)
+                .replace(/\s*\(L['eE]\)\s*$/i, '')
+                .replace(/\s*\(Le\)\s*$/i, '')
+                .replace(/\s*\(La\)\s*$/i, '')
+                .replace(/\s*\(Les\)\s*$/i, '')
+                .trim();
+        }
+
+        // Squamata, Chelonii, etc. : selon l’export TaxRef, ça peut être en colonne « class » ou « order ».
+        const REPTILE_ORDERS = new Set(['Squamata', 'Chelonii', 'Testudines', 'Crocodylia', 'Rhynchocephalia', 'Serpentes']);
+
+        function getGroupFromTaxon(kingdom, clazz, order) {
+            if (kingdom === 'Plantae') return 'Plantes';
+            if (clazz === 'Amphibia') return 'Amphibiens';
+            if (clazz === 'Reptilia') return 'Reptiles';
+            if ((clazz && REPTILE_ORDERS.has(clazz)) || (order && REPTILE_ORDERS.has(order))) return 'Reptiles';
+            if (clazz === 'Aves') return 'Oiseaux';
+            if (clazz === 'Arachnida') return 'Arachnides';
+            if (clazz === 'Mammalia') return 'Mammifères';
+            if (['Actinopterygii', 'Chondrichthyes', 'Sarcopterygii', 'Petromyzonti', 'Myxini'].includes(clazz)) return 'Poissons';
+            if (order === 'Lepidoptera') return 'Lépidoptères';
+            if (order === 'Odonata') return 'Odonates';
+            if (order === 'Orthoptera') return 'Orthoptères';
+            return '';
+        }
+
+        async function loadJsonWithFallback(path) {
+            try {
+                const resp = await fetch(path);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                return await resp.json();
+            } catch (fetchErr) {
+                // En contexte file://, fetch peut échouer alors que XHR fonctionne.
+                if (window.location.protocol !== 'file:') throw fetchErr;
+                return await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', path, true);
+                    xhr.onload = function () {
+                        // status=0 est courant en local file://
+                        if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
+                            try {
+                                resolve(JSON.parse(xhr.responseText));
+                            } catch (e) {
+                                reject(e);
+                            }
+                        } else {
+                            reject(new Error(`XHR ${xhr.status}`));
+                        }
+                    };
+                    xhr.onerror = function () {
+                        reject(new Error('XHR failed'));
+                    };
+                    xhr.send();
+                });
+            }
+        }
+
+        async function loadTaxonLookup(targetScientificNames = null) {
+            if (taxonByScientificName.size > 0) return;
+
+            try {
+                // Fastest path (works en file://): lookup injecté via script JS local
+                if (window.TAXON_LOOKUP && Array.isArray(window.TAXON_LOOKUP.entries)) {
+                    window.TAXON_LOOKUP.entries.forEach((e) => {
+                        const entry = {
+                            acceptedNameUsage: e.acceptedNameUsage || '',
+                            vernacularName: e.vernacularName || '',
+                            group: e.group || ''
+                        };
+                        const key = normalizeTaxonName(e.scientificName || '');
+                        if (key && !taxonByScientificName.has(key)) {
+                            taxonByScientificName.set(key, entry);
+                        }
+                        const sid = String(e.scientificNameID ?? '').trim();
+                        if (sid && !taxonByScientificNameId.has(sid)) {
+                            taxonByScientificNameId.set(sid, entry);
+                        }
+                    });
+                    return;
+                }
+
+                // Fast path: fichier compact généré en amont
+                const compact = await loadJsonWithFallback('taxon-lookup.min.json');
+                if (compact && Array.isArray(compact.entries)) {
+                    compact.entries.forEach((e) => {
+                        const entry = {
+                            acceptedNameUsage: e.acceptedNameUsage || '',
+                            vernacularName: e.vernacularName || '',
+                            group: e.group || ''
+                        };
+                        const key = normalizeTaxonName(e.scientificName || '');
+                        if (key && !taxonByScientificName.has(key)) {
+                            taxonByScientificName.set(key, entry);
+                        }
+                        const sid = String(e.scientificNameID ?? '').trim();
+                        if (sid && !taxonByScientificNameId.has(sid)) {
+                            taxonByScientificNameId.set(sid, entry);
+                        }
+                    });
+                    return;
+                }
+
+                const response = await fetch('taxon.txt');
+                if (!response.ok) {
+                    throw new Error(`taxon.txt introuvable (${response.status})`);
+                }
+
+                if (!response.body) {
+                    throw new Error('Flux de lecture indisponible pour taxon.txt');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let buffer = '';
+                let isHeaderParsed = false;
+                const idx = {
+                    kingdom: -1,
+                    class: -1,
+                    order: -1,
+                    scientificName: -1,
+                    acceptedNameUsage: -1,
+                    vernacularName: -1
+                };
+
+                let remainingTargets = targetScientificNames ? new Set(targetScientificNames) : null;
+
+                const processLine = (line) => {
+                    if (!line) return;
+                    if (!isHeaderParsed) {
+                        const header = line.split('\t');
+                        idx.kingdom = header.indexOf('kingdom');
+                        idx.class = header.indexOf('class');
+                        idx.order = header.indexOf('order');
+                        idx.scientificName = header.indexOf('scientificName');
+                        idx.acceptedNameUsage = header.indexOf('acceptedNameUsage');
+                        idx.vernacularName = header.indexOf('vernacularName');
+
+                        if (Object.values(idx).some(v => v === -1)) {
+                            throw new Error('Colonnes manquantes dans taxon.txt');
+                        }
+                        isHeaderParsed = true;
+                        return;
+                    }
+
+                    const cols = line.split('\t');
+                    const scientificName = (cols[idx.scientificName] || '').trim();
+                    if (!scientificName) return;
+
+                    const acceptedNameUsage = (cols[idx.acceptedNameUsage] || '').trim();
+                    const scientificNameID = (cols[2] || '').trim();
+                    const kingdom = (cols[idx.kingdom] || '').trim();
+                    const clazz = (cols[idx.class] || '').trim();
+                    const order = (cols[idx.order] || '').trim();
+                    const group = getGroupFromTaxon(kingdom, clazz, order);
+
+                    const rawVernacular = (cols[idx.vernacularName] || '').trim();
+                    let vernacular = '';
+                    if (rawVernacular) {
+                        const first = rawVernacular.split(',')[0];
+                        vernacular = normalizeVernacular(first);
+                    }
+
+                    const entry = {
+                        acceptedNameUsage: acceptedNameUsage || scientificName,
+                        vernacularName: vernacular,
+                        group: group || ''
+                    };
+
+                    // Correspondance demandée : NOM_TAXON <-> scientificName
+                    const sciKey = normalizeTaxonName(scientificName);
+                    if (sciKey && !taxonByScientificName.has(sciKey)) {
+                        taxonByScientificName.set(sciKey, entry);
+                    }
+                    if (scientificNameID && !taxonByScientificNameId.has(scientificNameID)) {
+                        taxonByScientificNameId.set(scientificNameID, entry);
+                    }
+
+                    if (remainingTargets && sciKey && remainingTargets.has(sciKey)) {
+                        remainingTargets.delete(sciKey);
+                    }
+                };
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split(/\r?\n/);
+                    buffer = lines.pop() || '';
+                    for (const line of lines) {
+                        processLine(line);
+                        if (remainingTargets && remainingTargets.size === 0) {
+                            await reader.cancel();
+                            buffer = '';
+                            break;
+                        }
+                    }
+                    if (remainingTargets && remainingTargets.size === 0) break;
+                }
+
+                if (buffer) {
+                    processLine(buffer);
+                }
+            } catch (error) {
+                taxonLookupLoadError = error.message || 'Erreur inconnue de chargement taxon';
+                console.warn('Chargement taxon lookup impossible :', taxonLookupLoadError);
+            }
+        }
+
+        function getTaxonInfoForName(nomTaxon, cdNom = '') {
+            const key = normalizeTaxonName(nomTaxon);
+            if (key) {
+                const bySci = taxonByScientificName.get(key);
+                if (bySci) return bySci;
+            }
+            const cdNomStr = String(cdNom ?? '').trim();
+            if (cdNomStr) {
+                const byId = taxonByScientificNameId.get(cdNomStr);
+                if (byId) return byId;
+            }
+            return { acceptedNameUsage: '', vernacularName: '', group: '' };
+        }
+
+        /** Vue SQL (GROUPE) si présent, sinon groupe TaxRef (cdNom / nom) — même logique pour tous les taxons. */
+        function mergeGroupeFromDbAndLookup(gDbRaw, sinpRow) {
+            const gDb = String(gDbRaw ?? '').trim();
+            const nomCite = sinpRow['nomCite'];
+            const nomValide = sinpRow['nomvalide(R)'];
+            const nomTaxonSource = (nomCite && String(nomCite).trim()) ? nomCite : nomValide;
+            const gLookup = getTaxonInfoForName(nomTaxonSource, sinpRow['cdNom']).group ?? '';
+            return normalizeTaxonomicGroupLabel(gDb || gLookup);
+        }
+
+        function getEffectiveGroupeForSinpRow(sinpRow) {
+            const id = String(sinpRow['identifiantOrigine'] ?? '').trim();
+            if (id && readableById.has(id)) {
+                const rr = readableById.get(id);
+                return mergeGroupeFromDbAndLookup(rr['GROUPE'] ?? rr['groupe'], sinpRow);
+            }
+            return mergeGroupeFromDbAndLookup('', sinpRow);
+        }
+
+        function parseYearFromJourDate(jourdateDebut) {
+            if (jourdateDebut === null || jourdateDebut === undefined) return '';
+            const s = String(jourdateDebut).trim();
+            if (!s) return '';
+            const iso = s.match(/^(\d{4})-\d{2}-\d{2}/);
+            if (iso) return iso[1];
+            const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+            if (dmy) {
+                let y = dmy[3];
+                if (y.length === 2) y = '20' + y;
+                return y;
+            }
+            const yOnly = s.match(/^(\d{4})$/);
+            if (yOnly) return yOnly[1];
+            return '';
+        }
+
+        function formatDateFromJourDate(jourdateDebut) {
+            if (jourdateDebut === null || jourdateDebut === undefined) return '';
+            const s = String(jourdateDebut).trim();
+            if (!s) return '';
+
+            const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+
+            const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+            if (dmy) {
+                const d = dmy[1].padStart(2, '0');
+                const m = dmy[2].padStart(2, '0');
+                let y = dmy[3];
+                if (y.length === 2) y = '20' + y;
+                return `${d}/${m}/${y}`;
+            }
+
+            return s;
+        }
+
+        function stripObservateurSinp(observateurIdentite) {
+            if (observateurIdentite === null || observateurIdentite === undefined) return '';
+            return String(observateurIdentite).replace(/\s*\(CEN Corse\)\s*$/i, '').trim();
+        }
+
+        function decodeOccEtatBioToEtatBio(code) {
+            const k = String(code ?? '').trim();
+            if (k === '') return '';
+            return MAP_OCC_ETAT_BIO_TO_SOURCE[k] ?? '';
+        }
+
+        function decodeOccStadeToStadeAge(code) {
+            const k = String(code ?? '').trim();
+            if (k === '') return '';
+            return MAP_OCC_STADE_TO_SOURCE[k] ?? k;
+        }
+
+        function decodeObjetDenombrementToType(code, nomCite) {
+            const hasTaxon = nomCite !== null && nomCite !== undefined && String(nomCite).trim() !== '';
+            if (!hasTaxon) return '';
+            const k = String(code ?? '').trim();
+            if (k === '') return 'Individu';
+            return MAP_OBJET_DENOMBREMENT_TO_TYPE[k] ?? k;
+        }
+
+        function decodeOccSexeToSexe(code) {
+            const k = String(code ?? '').trim();
+            if (k === '') return '';
+            return MAP_OCC_SEXE_TO_SOURCE[k] ?? k;
+        }
+
+        function decodeOccStatutBioToComporteme(code) {
+            const k = String(code ?? '').trim();
+            if (k === '' || k === '0') return '';
+            return MAP_OCC_STATUT_BIO_TO_COMPORTEME[k] ?? k;
+        }
+
+        function rowToReadable(row) {
+            const rowId = String(row['identifiantOrigine'] ?? '').trim();
+            if (rowId && readableById.has(rowId)) {
+                return readableById.get(rowId);
+            }
+
+            const nomCite = row['nomCite'];
+            const nomValide = row['nomvalide(R)'];
+            const nomTaxonSource = (nomCite && String(nomCite).trim()) ? nomCite : nomValide;
+            const taxonInfo = getTaxonInfoForName(nomTaxonSource, row['cdNom']);
+            const lon = row['Longitude (coordonnée x)'];
+            const lat = row['Latitude (coordonnée y)'];
+            const fmtCoord = (v) => {
+                if (v === null || v === undefined || v === '') return '';
+                const n = Number(v);
+                return Number.isFinite(n) ? String(n).replace('.', ',') : String(v);
+            };
+            return {
+                ENVOYE_NATIONAL: row['envoye_national'],
+                IDENTIFIANTORIGINE: row['identifiantOrigine'] ?? '',
+                SOURCE_FICHIER: row['source_fichier'] ?? '',
+                CADRE_ACQU: row['Cadre_Acquisition'] ?? '',
+                OBS: stripObservateurSinp(row['observateurIdentite']),
+                ANNEE: parseYearFromJourDate(row['jourdateDebut']),
+                DATE: formatDateFromJourDate(row['jourdateDebut']),
+                HEURE: row['heuredateDebut'] ?? '',
+                COMMUNE: row['nomCommune'] ?? '',
+                COM_LOCAL: row['commentLocal(R)'] ?? '',
+                PROTOCOLE: '',
+                GROUPE: mergeGroupeFromDbAndLookup('', row),
+                NOM_TAXON: nomTaxonSource ?? '',
+                NOM_VERNACULAIRE: (() => {
+                    const vn = getVernacularForCdNom(row['cdNom']);
+                    if (taxonRefScientificIds.size > 0) return vn || '';
+                    return vn || taxonInfo.vernacularName || '';
+                })(),
+                ETAT_BIO: decodeOccEtatBioToEtatBio(row['OccEtatBiologique']),
+                STADE_AGE: decodeOccStadeToStadeAge(row['occStadeDeVie']),
+                TYPE: decodeObjetDenombrementToType(row['objetDenombrement'], nomTaxonSource),
+                EFFECTIF: row['denombrementMin'] ?? '',
+                SEXE: decodeOccSexeToSexe(row['occSexe']),
+                COMPORTEME: decodeOccStatutBioToComporteme(row['occStatutBiologique']),
+                DESCRIPTI: row['obsDescription'] ?? '',
+                RMQ: row['OccCommentaire'] ?? '',
+                X_L93: fmtCoord(lon),
+                Y_L93: fmtCoord(lat)
+            };
+        }
+
+        function getReadableSortComparable(row, columnKey) {
+            const r = rowToReadable(row);
+            const v = r[columnKey];
+            if (columnKey === 'ENVOYE_NATIONAL') {
+                return isTruthyBoolean(v) ? 1 : 0;
+            }
+            if (v === null || v === undefined) return '';
+            return String(v);
+        }
+
+        function getColumnKeyForWidth(columnName) {
+            return `${tableViewMode}::${columnName}`;
+        }
+
+        function applyPersistedColumnWidths() {
+            document.querySelectorAll('th[data-column]').forEach(th => {
+                const key = getColumnKeyForWidth(th.dataset.column);
+                const width = columnWidths[key];
+                if (width) {
+                    th.style.width = `${width}px`;
+                    th.style.minWidth = `${width}px`;
+                    th.style.maxWidth = `${width}px`;
+                }
+            });
+        }
+
+        function enableColumnResize() {
+            document.querySelectorAll('th[data-column]').forEach(th => {
+                th.classList.add('resizable');
+                if (th.querySelector('.col-resizer')) return;
+
+                const resizer = document.createElement('span');
+                resizer.className = 'col-resizer';
+                th.appendChild(resizer);
+
+                resizer.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const startX = e.clientX;
+                    const startWidth = th.getBoundingClientRect().width;
+                    const colName = th.dataset.column;
+
+                    const onMove = (moveEvt) => {
+                        const delta = moveEvt.clientX - startX;
+                        const newWidth = Math.max(60, Math.round(startWidth + delta));
+                        th.style.width = `${newWidth}px`;
+                        th.style.minWidth = `${newWidth}px`;
+                        th.style.maxWidth = `${newWidth}px`;
+                        columnWidths[getColumnKeyForWidth(colName)] = newWidth;
+                    };
+
+                    const onUp = () => {
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                    };
+
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
+                });
+            });
+        }
+
+        function attachTableHeaderInteractions() {
+            applyPersistedColumnWidths();
+            enableColumnResize();
+            document.querySelectorAll('th[data-column]').forEach(th => {
+                th.addEventListener('click', (e) => {
+                    if (e.target && e.target.classList.contains('col-resizer')) return;
+                    sortData(th.dataset.column);
+                });
+            });
+        }
+
+        function updateViewModeHint() {
+            const el = document.getElementById('viewModeHint');
+            const info = document.getElementById('resultsInfoText');
+            if (!el) return;
+            if (tableViewMode === 'readable') {
+                el.textContent = '';
+                if (info) info.textContent = '';
+            } else {
+                el.textContent = '';
+                if (info) info.textContent = '';
+            }
+        }
+
+        function buildFilterOptionsHtml(groups) {
+            let html = '<option value="">Choisir la colonne</option>';
+            groups.forEach(group => {
+                html += `<optgroup label="${group.label}">`;
+                group.options.forEach(opt => {
+                    html += `<option value="${opt.value}">${opt.label}</option>`;
+                });
+                html += '</optgroup>';
+            });
+            return html;
+        }
+
+        function refreshFilterColumnOptions() {
+            const groups = tableViewMode === 'readable' ? READABLE_FILTER_GROUPS : SINP_FILTER_GROUPS;
+            const validValues = new Set(groups.flatMap(g => g.options.map(o => o.value)));
+            const html = buildFilterOptionsHtml(groups);
+
+            document.querySelectorAll('.filter-column').forEach(select => {
+                const previous = select.value;
+                select.innerHTML = html;
+                select.value = validValues.has(previous) ? previous : '';
+            });
+        }
+
+        function buildReadableUniqueValuesCache() {
+            uniqueValuesCacheReadable = {};
+            COLUMNS_WITH_SUGGESTIONS_READABLE.forEach(col => {
+                const values = new Set();
+                readableData.forEach(row => {
+                    const val = row[col];
+                    if (val !== null && val !== undefined && String(val).trim() !== '') {
+                        values.add(String(val).trim());
+                    }
+                });
+                const sortedValues = Array.from(values).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+                uniqueValuesCacheReadable[col] = sortedValues;
+            });
+        }
+
+        function showTaxonDebugStatus() {
+            const resultsInfo = document.getElementById('resultsInfoText');
+            if (!resultsInfo || tableViewMode !== 'readable') return;
+            resultsInfo.textContent = '';
+        }
+
+        async function fetchAllRowsFromTable(tableName, estimatedTotal, progressStart, progressSpan, label) {
+            let allResults = [];
+            let from = 0;
+            const batchSize = 1000;
+            let hasMore = true;
+
+            while (hasMore) {
+                const { data, error } = await supabaseClient
+                    .from(tableName)
+                    .select('*')
+                    .range(from, from + batchSize - 1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    allResults = allResults.concat(data);
+                    from += batchSize;
+                    const progress = Math.min(progressStart + progressSpan, (allResults.length / estimatedTotal) * progressSpan + progressStart);
+                    updateLoadingProgress(progress, `${allResults.length.toLocaleString('fr-FR')} ${label}...`);
+                    if (data.length < batchSize) hasMore = false;
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            return allResults;
+        }
+
+        /** Harmonise les variantes « reptiles » avec le même style que Amphibiens, Oiseaux… */
+        function normalizeTaxonomicGroupLabel(g) {
+            const s = String(g ?? '').trim();
+            if (s.toLowerCase() === 'reptiles') return 'Reptiles';
+            return s;
+        }
+
+        /** Charge taxon_ref : ids, lien vers taxon accepté, vernaculaire CSV, groupes pour sous-espèces. */
+        async function loadTaxonRefData() {
+            taxonRefScientificIds = new Set();
+            taxonRefAcceptedByScientificId = new Map();
+            taxonRefAcceptedNameUsageByScientificId = new Map();
+            taxonRefMembersByAccepted = new Map();
+            taxonRefVernacularById = new Map();
+            taxonRefGroupVernacular = new Map();
+            let from = 0;
+            const batchSize = 1000;
+            let hasMore = true;
+            try {
+                while (hasMore) {
+                    const { data, error } = await supabaseClient
+                        .from(TABLE_NAME_TAXON_REF)
+                        .select('scientificnameid, acceptednameusageid, vernacularname, group_label')
+                        .range(from, from + batchSize - 1);
+                    if (error) throw error;
+                    if (!data || data.length === 0) {
+                        hasMore = false;
+                        break;
+                    }
+                    data.forEach((row) => {
+                        const sid = String(row.scientificnameid ?? row.scientificNameID ?? '').trim();
+                        if (!sid) return;
+                        taxonRefScientificIds.add(sid);
+                        const accRaw = row.acceptednameusageid ?? row.acceptedNameUsageID;
+                        const accStr = accRaw !== null && accRaw !== undefined && String(accRaw).trim() !== ''
+                            ? String(accRaw).trim()
+                            : sid;
+                        taxonRefAcceptedNameUsageByScientificId.set(sid, accStr);
+                        if (!taxonRefMembersByAccepted.has(accStr)) taxonRefMembersByAccepted.set(accStr, new Set());
+                        taxonRefMembersByAccepted.get(accStr).add(sid);
+                        if (accStr !== sid) taxonRefAcceptedByScientificId.set(sid, accStr);
+                        const rawV = String(row.vernacularname ?? row.vernacularName ?? '').trim();
+                        if (rawV && !taxonRefVernacularById.has(sid)) {
+                            const first = rawV.split(',')[0].trim();
+                            taxonRefVernacularById.set(sid, normalizeVernacular(first));
+                        }
+                    });
+                    from += batchSize;
+                    if (data.length < batchSize) hasMore = false;
+                }
+            } catch (e) {
+                console.warn('Table taxon_ref :', e.message || e);
+                taxonRefScientificIds = new Set();
+                taxonRefAcceptedByScientificId = new Map();
+                taxonRefAcceptedNameUsageByScientificId = new Map();
+                taxonRefMembersByAccepted = new Map();
+                taxonRefVernacularById = new Map();
+            }
+        }
+
+        function buildTaxonRefGroupVernacular() {
+            taxonRefGroupVernacular = new Map();
+            taxonRefMembersByAccepted.forEach((members, acc) => {
+                for (const m of members) {
+                    const vn = vernacularByCdNom.get(m) || taxonRefVernacularById.get(m);
+                    if (vn) {
+                        taxonRefGroupVernacular.set(acc, vn);
+                        return;
+                    }
+                }
+            });
+        }
+
+        function collectExpandedVernacularIdList(seedIdStrings) {
+            const out = new Set();
+            const addChain = (start) => {
+                let id = start;
+                const vis = new Set();
+                for (let d = 0; d < 10 && id && !vis.has(id); d++) {
+                    vis.add(id);
+                    out.add(id);
+                    const p = taxonRefAcceptedByScientificId.get(id);
+                    if (!p || p === id) break;
+                    id = p;
+                }
+            };
+            seedIdStrings.forEach((sid) => {
+                addChain(sid);
+                const gk = taxonRefAcceptedNameUsageByScientificId.get(sid) || sid;
+                const memb = taxonRefMembersByAccepted.get(gk);
+                if (memb) memb.forEach((m) => out.add(String(m)));
+            });
+            return Array.from(out);
+        }
+
+        function getVernacularForCdNom(cdNom) {
+            const k = String(cdNom ?? '').trim();
+            if (!k) return '';
+            if (taxonRefScientificIds.size > 0 && !taxonRefScientificIds.has(k)) return '';
+
+            let id = k;
+            const visited = new Set();
+            for (let depth = 0; depth < 10 && id && !visited.has(id); depth++) {
+                visited.add(id);
+                const direct = vernacularByCdNom.get(id) || taxonRefVernacularById.get(id);
+                if (direct) return direct;
+                const parent = taxonRefAcceptedByScientificId.get(id);
+                if (!parent || parent === id) break;
+                id = parent;
+            }
+
+            const gk = taxonRefAcceptedNameUsageByScientificId.get(k) || k;
+            const groupVn = taxonRefGroupVernacular.get(gk);
+            if (groupVn) return groupVn;
+
+            return '';
+        }
+
+        function setReadableNomVernaculaire(r, value) {
+            const v = value ?? '';
+            r['NOM_VERNACULAIRE'] = v;
+            Object.keys(r).forEach((key) => {
+                if (key !== 'NOM_VERNACULAIRE' && key.toLowerCase() === 'nom_vernaculaire') r[key] = v;
+            });
+        }
+
+        async function loadVernacularnamesForCdNoms(sinpRows) {
+            vernacularByCdNom = new Map();
+            const seeds = new Set();
+            const useTaxonRefFilter = taxonRefScientificIds.size > 0;
+            sinpRows.forEach(row => {
+                const c = String(row['cdNom'] ?? '').trim();
+                if (c && /^\d+$/.test(c)) {
+                    if (!useTaxonRefFilter || taxonRefScientificIds.has(c)) seeds.add(c);
+                }
+            });
+            const idList = collectExpandedVernacularIdList(Array.from(seeds));
+            if (idList.length === 0) return;
+            const chunkSize = 100;
+            for (let i = 0; i < idList.length; i += chunkSize) {
+                const chunk = idList.slice(i, i + chunkSize).map((x) => parseInt(x, 10));
+                try {
+                    const { data, error } = await supabaseClient
+                        .from(TABLE_NAME_VERNACULAR)
+                        .select('id, vernacularName')
+                        .eq('language', 'Français')
+                        .in('id', chunk);
+                    if (error) throw error;
+                    (data || []).forEach((row) => {
+                        const id = String(row.id);
+                        const raw = String(row.vernacularName ?? row.vernacularname ?? '').trim();
+                        if (!raw) return;
+                        const first = raw.split(',')[0].trim();
+                        const vn = normalizeVernacular(first);
+                        if (vn && !vernacularByCdNom.has(id)) vernacularByCdNom.set(id, vn);
+                    });
+                } catch (e) {
+                    console.warn('Table vernacularname :', e.message || e);
+                    break;
+                }
+            }
+        }
 
         // DOM Elements
         const filtersContainer = document.getElementById('filtersContainer');
@@ -1665,38 +2692,77 @@
             updateLoadingProgress(5, 'Connexion à la base de données...');
             
             try {
-                let allResults = [];
-                let from = 0;
-                const batchSize = 1000;
-                let hasMore = true;
-                const estimatedTotal = 15000; // Estimation pour la barre
+                updateLoadingProgress(8, 'Référentiel taxonomique TaxRef (groupes, noms)…');
+                await loadTaxonLookup();
 
-                while (hasMore) {
-                    const { data, error } = await supabaseClient
-                        .from(TABLE_NAME)
-                        .select('*')
-                        .range(from, from + batchSize - 1);
-
-                    if (error) throw error;
-
-                    if (data && data.length > 0) {
-                        allResults = allResults.concat(data);
-                        from += batchSize;
-                        
-                        // Mise à jour de la progression
-                        const progress = Math.min(85, (allResults.length / estimatedTotal) * 80 + 10);
-                        updateLoadingProgress(progress, `${allResults.length.toLocaleString('fr-FR')} observations chargées...`);
-                        
-                        if (data.length < batchSize) hasMore = false;
-                    } else {
-                        hasMore = false;
-                    }
-                }
+                const estimatedTotal = 20000;
+                const sinpRows = await fetchAllRowsFromTable(
+                    TABLE_NAME_SINP,
+                    estimatedTotal,
+                    10,
+                    70,
+                    'observations SINP chargées'
+                );
 
                 updateLoadingProgress(90, 'Préparation des données...');
 
-                allData = allResults;
+                allData = sinpRows;
                 filteredData = [...allData];
+                sinpById = new Map();
+                allData.forEach(r => {
+                    const id = String(r['identifiantOrigine'] ?? '').trim();
+                    if (id) sinpById.set(id, r);
+                });
+
+                updateLoadingProgress(89, 'Référentiel taxon_ref...');
+                await loadTaxonRefData();
+                updateLoadingProgress(91, 'Noms vernaculaires (Français, liés taxon_ref)...');
+                await loadVernacularnamesForCdNoms(allData);
+                buildTaxonRefGroupVernacular();
+
+                updateLoadingProgress(93, 'Chargement vue lisible...');
+                readableById = new Map();
+                readableData = [];
+                try {
+                    const readableRows = await fetchAllRowsFromTable(
+                        TABLE_NAME_READABLE,
+                        estimatedTotal,
+                        93,
+                        6,
+                        'lignes lisibles chargées'
+                    );
+                    readableData = readableRows;
+                    readableRows.forEach(r => {
+                        const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
+                        const cd = String(r['cdNom'] ?? r['CDNOM'] ?? '').trim();
+                        const cdFromSinp = orig && sinpById.has(orig) ? String(sinpById.get(orig)['cdNom'] ?? '').trim() : '';
+                        const effectiveCd = cd || cdFromSinp;
+                        const vn = getVernacularForCdNom(effectiveCd);
+                        if (taxonRefScientificIds.size > 0) {
+                            setReadableNomVernaculaire(r, vn || '');
+                        } else if (vn) {
+                            setReadableNomVernaculaire(r, vn);
+                        }
+                        const sinpRow = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                        if (sinpRow) {
+                            const g = mergeGroupeFromDbAndLookup(r['GROUPE'] ?? r['groupe'], sinpRow);
+                            r['GROUPE'] = g;
+                            Object.keys(r).forEach((key) => {
+                                if (key !== 'GROUPE' && key.toLowerCase() === 'groupe') r[key] = g;
+                            });
+                        } else {
+                            const gNorm = normalizeTaxonomicGroupLabel(r['GROUPE'] ?? '');
+                            r['GROUPE'] = gNorm;
+                            Object.keys(r).forEach((key) => {
+                                if (key !== 'GROUPE' && key.toLowerCase() === 'groupe') r[key] = gNorm;
+                            });
+                        }
+                        if (orig) readableById.set(orig, r);
+                    });
+                } catch (readableError) {
+                    console.warn('Vue lisible indisponible, fallback local:', readableError.message);
+                    readableData = allData.map(row => rowToReadable(row));
+                }
                 
                 if (allData.length > 0) {
                     columns = Object.keys(allData[0]);
@@ -1707,6 +2773,7 @@
                     });
                     // Pré-calculer les valeurs uniques pour les colonnes avec suggestions
                     buildUniqueValuesCache();
+                    buildReadableUniqueValuesCache();
                 }
 
                 updateLoadingProgress(100, 'Prêt !');
@@ -1716,6 +2783,7 @@
                 setTimeout(function() {
                     if (sessionStorage.getItem(SESSION_KEY) === 'granted') {
                         showApp();
+                        updateViewModeHint();
                         displayResults();
                     }
                 }, 500);
@@ -1732,11 +2800,11 @@
 
         // Construire le cache des valeurs uniques
         function buildUniqueValuesCache() {
-            COLUMNS_WITH_SUGGESTIONS.forEach(col => {
+            COLUMNS_WITH_SUGGESTIONS_SINP.forEach(col => {
                 const values = new Set();
                 allData.forEach(row => {
                     const val = row[col];
-                    if (val && String(val).trim()) {
+                    if (val !== null && val !== undefined && String(val).trim() !== '') {
                         values.add(String(val).trim());
                     }
                 });
@@ -1782,6 +2850,7 @@
                             <optgroup label="Source">
                                 <option value="source_fichier">Source fichier</option>
                                 <option value="Cadre_Acquisition">Cadre acquisition</option>
+                                <option value="envoye_national">Envoyé national</option>
                             </optgroup>
                             <optgroup label="Taxonomie">
                                 <option value="nomvalide(R)">Nom scientifique</option>
@@ -1853,14 +2922,16 @@
 
             searchInput.addEventListener('input', () => {
                 const col = columnSelect.value;
-                if (COLUMNS_WITH_SUGGESTIONS.includes(col)) {
+                const suggCols = tableViewMode === 'readable' ? COLUMNS_WITH_SUGGESTIONS_READABLE : COLUMNS_WITH_SUGGESTIONS_SINP;
+                if (suggCols.includes(col)) {
                     updateSuggestions(filterId, col, searchInput.value);
                 }
             });
 
             searchInput.addEventListener('focus', () => {
                 const col = columnSelect.value;
-                if (COLUMNS_WITH_SUGGESTIONS.includes(col)) {
+                const suggCols = tableViewMode === 'readable' ? COLUMNS_WITH_SUGGESTIONS_READABLE : COLUMNS_WITH_SUGGESTIONS_SINP;
+                if (suggCols.includes(col)) {
                     updateSuggestions(filterId, col, searchInput.value);
                 }
             });
@@ -1878,6 +2949,7 @@
 
         // Initialiser les listeners du premier filtre
         setupFilterListeners(0);
+        refreshFilterColumnOptions();
 
         // Mettre à jour les suggestions dans le dropdown
         function updateSuggestions(filterId, column, filterText = '', forceShowAll = false) {
@@ -1887,12 +2959,15 @@
             dropdown.innerHTML = '';
             selectedIndex = -1;
             
-            if (!COLUMNS_WITH_SUGGESTIONS.includes(column)) {
+            const suggCols = tableViewMode === 'readable' ? COLUMNS_WITH_SUGGESTIONS_READABLE : COLUMNS_WITH_SUGGESTIONS_SINP;
+            if (!suggCols.includes(column)) {
                 dropdown.classList.remove('active');
                 return;
             }
 
-            const values = uniqueValuesCache[column] || [];
+            const values = tableViewMode === 'readable'
+                ? (uniqueValuesCacheReadable[column] || [])
+                : (uniqueValuesCache[column] || []);
             const filter = filterText.toLowerCase();
             
             const isSpeciesColumn = column === 'nomvalide(R)';
@@ -1972,24 +3047,51 @@
             currentSearchTerm = filters.length > 0 ? filters[0].value : '';
             currentSearchColumn = filters.length > 0 && filters[0].column ? filters[0].column : '';
 
-            if (filters.length === 0) {
-                filteredData = [...allData];
-            } else {
-                filteredData = allData.filter(row => {
-                    return filters.every(filter => {
-                        if (filter.column) {
-                            const val = row[filter.column];
-                            return val && String(val).toLowerCase().includes(filter.value);
-                        } else {
-                            // Recherche globale
-                            const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
-                            return searchCols.some(col => {
-                                const val = row[col];
-                                return val && String(val).toLowerCase().includes(filter.value);
-                            });
-                        }
+            if (tableViewMode === 'readable') {
+                const baseReadable = readableData.length > 0 ? readableData : allData.map(row => rowToReadable(row));
+                let filteredReadable = [];
+                if (filters.length === 0) {
+                    filteredReadable = [...baseReadable];
+                } else {
+                    filteredReadable = baseReadable.filter(row => {
+                        return filters.every(filter => {
+                            if (filter.column) {
+                                const val = row[filter.column];
+                                return val !== null && val !== undefined && String(val).toLowerCase().includes(filter.value);
+                            } else {
+                                const searchCols = ['NOM_TAXON', 'NOM_VERNACULAIRE', 'COMMUNE', 'OBS', 'SOURCE_FICHIER', 'GROUPE'];
+                                return searchCols.some(col => {
+                                    const val = row[col];
+                                    return val !== null && val !== undefined && String(val).toLowerCase().includes(filter.value);
+                                });
+                            }
+                        });
                     });
-                });
+                }
+
+                filteredData = filteredReadable
+                    .map(r => sinpById.get(String(r['IDENTIFIANTORIGINE'] ?? '').trim()))
+                    .filter(Boolean);
+            } else {
+                if (filters.length === 0) {
+                    filteredData = [...allData];
+                } else {
+                    filteredData = allData.filter(row => {
+                        return filters.every(filter => {
+                            if (filter.column) {
+                                const val = row[filter.column];
+                                return val !== null && val !== undefined && String(val).toLowerCase().includes(filter.value);
+                            } else {
+                                // Recherche globale
+                                const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
+                                return searchCols.some(col => {
+                                    const val = row[col];
+                                    return val && String(val).toLowerCase().includes(filter.value);
+                                });
+                            }
+                        });
+                    });
+                }
             }
 
             currentPage = 1;
@@ -2044,15 +3146,20 @@
             if (typeof map !== 'undefined' && map) {
                 // Reset aussi les filtres de la carte
                 document.getElementById('mapProjectFilter').value = '';
+                const mapYear = document.getElementById('mapYearFilter');
+                if (mapYear) mapYear.value = '';
                 const obsInput = document.getElementById('mapObserverFilter');
                 if (obsInput) {
                     obsInput.value = '';
                     obsInput.classList.remove('has-value');
                 }
                 document.getElementById('mapSpeciesFilter').value = '';
+                const mapGroup = document.getElementById('mapGroupFilter');
+                if (mapGroup) mapGroup.value = '';
                 const dropdown = document.getElementById('observerDropdown');
                 if (dropdown) dropdown.classList.remove('active');
-                loadMapPoints();
+                if (typeof clearMapDrawnZone === 'function') clearMapDrawnZone();
+                applyMapFilters();
             }
         });
 
@@ -2065,26 +3172,41 @@
                 sortDirection = 'asc';
             }
 
-            filteredData.sort((a, b) => {
-                let valA = a[column] ?? '';
-                let valB = b[column] ?? '';
-                
-                // Try numeric sort
-                const numA = parseFloat(valA);
-                const numB = parseFloat(valB);
-                
-                if (!isNaN(numA) && !isNaN(numB)) {
-                    return sortDirection === 'asc' ? numA - numB : numB - numA;
-                }
-                
-                // String sort
-                valA = String(valA).toLowerCase();
-                valB = String(valB).toLowerCase();
-                
-                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
+            if (tableViewMode === 'readable') {
+                filteredData.sort((a, b) => {
+                    const va = getReadableSortComparable(a, column);
+                    const vb = getReadableSortComparable(b, column);
+                    let cmp = 0;
+                    if (typeof va === 'number' && typeof vb === 'number') {
+                        cmp = va - vb;
+                    } else {
+                        cmp = String(va).localeCompare(String(vb), 'fr', { numeric: true, sensitivity: 'base' });
+                    }
+                    return sortDirection === 'asc' ? cmp : -cmp;
+                });
+            } else {
+                filteredData.sort((a, b) => {
+                    let valA = a[column] ?? '';
+                    let valB = b[column] ?? '';
+                    
+                    if (valA !== null && valA !== undefined && typeof valA === 'boolean') valA = valA ? 'true' : 'false';
+                    if (valB !== null && valB !== undefined && typeof valB === 'boolean') valB = valB ? 'true' : 'false';
+
+                    const numA = parseFloat(valA);
+                    const numB = parseFloat(valB);
+                    
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return sortDirection === 'asc' ? numA - numB : numB - numA;
+                    }
+                    
+                    valA = String(valA).toLowerCase();
+                    valB = String(valB).toLowerCase();
+                    
+                    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
 
             displayResults();
         }
@@ -2109,6 +3231,23 @@
             pageSize = parseInt(pageSizeSelect.value);
             currentPage = 1;
             displayResults();
+        });
+
+        document.querySelectorAll('.view-mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.tableView;
+                if (!mode || mode === tableViewMode) return;
+                tableViewMode = mode;
+                document.querySelectorAll('.view-mode-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.tableView === tableViewMode);
+                });
+                sortColumn = null;
+                sortDirection = 'asc';
+                currentPage = 1;
+                updateViewModeHint();
+                refreshFilterColumnOptions();
+                displayResults();
+            });
         });
 
         // Display results
@@ -2139,45 +3278,85 @@
             updatePagination(currentPage, totalPages);
 
             let html = '<table><thead><tr>';
-            
-            // Utiliser displayColumns pour l'affichage (colonnes filtrées)
-            displayColumns.forEach(col => {
-                const isSorted = sortColumn === col;
-                const icon = isSorted ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅';
-                html += `<th class="${isSorted ? 'sorted' : ''}" data-column="${col}">${col}<span class="sort-icon">${icon}</span></th>`;
-            });
-            
-            html += '</tr></thead><tbody>';
 
-            pageData.forEach(row => {
-                html += '<tr>';
-                displayColumns.forEach(col => {
-                    let value = row[col] ?? '';
-                    const rawValue = String(value);
-                    
-                    // Highlight search term
-                    if (currentSearchTerm && value) {
-                        const regex = new RegExp(`(${escapeRegExp(currentSearchTerm)})`, 'gi');
-                        value = String(value).replace(regex, '<span class="highlight">$1</span>');
-                    }
-                    
-                    html += `<td title="${escapeHtml(rawValue)}">${value}</td>`;
+            if (tableViewMode === 'readable') {
+                READABLE_COLUMN_ORDER.forEach(col => {
+                    const isSorted = sortColumn === col;
+                    const icon = isSorted ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅';
+                    html += `<th class="${isSorted ? 'sorted' : ''}" data-column="${escapeHtml(col)}">${escapeHtml(col)}<span class="sort-icon">${icon}</span></th>`;
                 });
-                html += '</tr>';
-            });
+                html += '</tr></thead><tbody>';
+
+                pageData.forEach(row => {
+                    const r = rowToReadable(row);
+                    html += '<tr>';
+                    READABLE_COLUMN_ORDER.forEach(col => {
+                        let value = r[col];
+                        const rawValue = value !== null && value !== undefined && typeof value === 'boolean'
+                            ? (value ? 'true' : 'false')
+                            : String(value ?? '');
+
+                        if (col === 'ENVOYE_NATIONAL') {
+                            const boolValue = isTruthyBoolean(value);
+                            const label = boolValue ? 'TRUE' : 'FALSE';
+                            value = `<span class="bool-badge ${boolValue ? 'true' : 'false'}">${label}</span>`;
+                            html += `<td title="${escapeHtml(rawValue)}">${value}</td>`;
+                            return;
+                        }
+
+                        let displayVal = rawValue;
+                        if (currentSearchTerm && displayVal) {
+                            const regex = new RegExp(`(${escapeRegExp(currentSearchTerm)})`, 'gi');
+                            displayVal = displayVal.replace(regex, '<span class="highlight">$1</span>');
+                        }
+                        html += `<td title="${escapeHtml(rawValue)}">${displayVal}</td>`;
+                    });
+                    html += '</tr>';
+                });
+            } else {
+                displayColumns.forEach(col => {
+                    const isSorted = sortColumn === col;
+                    const icon = isSorted ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅';
+                    html += `<th class="${isSorted ? 'sorted' : ''}" data-column="${col}">${col}<span class="sort-icon">${icon}</span></th>`;
+                });
+
+                html += '</tr></thead><tbody>';
+
+                pageData.forEach(row => {
+                    html += '<tr>';
+                    displayColumns.forEach(col => {
+                        let value = row[col] ?? '';
+                        const rawValue = String(value);
+
+                        if (String(col).toLowerCase() === 'envoye_national') {
+                            const boolValue = isTruthyBoolean(value);
+                            const label = boolValue ? 'TRUE' : 'FALSE';
+                            value = `<span class="bool-badge ${boolValue ? 'true' : 'false'}">${label}</span>`;
+                            html += `<td title="${escapeHtml(rawValue)}">${value}</td>`;
+                            return;
+                        }
+
+                        if (currentSearchTerm && value) {
+                            const regex = new RegExp(`(${escapeRegExp(currentSearchTerm)})`, 'gi');
+                            value = String(value).replace(regex, '<span class="highlight">$1</span>');
+                        }
+
+                        html += `<td title="${escapeHtml(rawValue)}">${value}</td>`;
+                    });
+                    html += '</tr>';
+                });
+            }
 
             html += '</tbody></table>';
             tableWrapper.innerHTML = html;
 
-            // Add sort listeners
-            document.querySelectorAll('th[data-column]').forEach(th => {
-                th.addEventListener('click', () => sortData(th.dataset.column));
-            });
+            attachTableHeaderInteractions();
 
-            // Scroll vers la colonne recherchée
-            if (currentSearchColumn && currentSearchTerm) {
+            if (currentSearchColumn && currentSearchTerm && tableViewMode === 'sinp') {
                 scrollToColumn(currentSearchColumn);
             }
+
+            showTaxonDebugStatus();
         }
 
         // Fonction pour scroller vers une colonne spécifique
@@ -2214,22 +3393,40 @@
                 return;
             }
 
-            let csv = columns.map(col => `"${col}"`).join(';') + '\n';
-
-            filteredData.forEach(row => {
-                csv += columns.map(col => {
-                    let val = row[col] ?? '';
-                    val = String(val).replace(/"/g, '""');
-                    return `"${val}"`;
-                }).join(';') + '\n';
-            });
-
             const BOM = '\uFEFF';
+            const date = new Date().toISOString().slice(0, 10);
+            let csv = '';
+            let filename = `export_cencorse_${date}.csv`;
+
+            if (tableViewMode === 'readable') {
+                csv = READABLE_COLUMN_ORDER.map(col => `"${col}"`).join(';') + '\n';
+                filteredData.forEach(row => {
+                    const r = rowToReadable(row);
+                    csv += READABLE_COLUMN_ORDER.map(col => {
+                        let val = r[col];
+                        if (val !== null && val !== undefined && typeof val === 'boolean') {
+                            val = val ? 'true' : 'false';
+                        }
+                        val = String(val ?? '').replace(/"/g, '""');
+                        return `"${val}"`;
+                    }).join(';') + '\n';
+                });
+                filename = `export_cencorse_lisible_${date}.csv`;
+            } else {
+                csv = columns.map(col => `"${col}"`).join(';') + '\n';
+                filteredData.forEach(row => {
+                    csv += columns.map(col => {
+                        let val = row[col] ?? '';
+                        val = String(val).replace(/"/g, '""');
+                        return `"${val}"`;
+                    }).join(';') + '\n';
+                });
+            }
+
             const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            const date = new Date().toISOString().slice(0, 10);
             link.href = URL.createObjectURL(blob);
-            link.download = `export_cencorse_${date}.csv`;
+            link.download = filename;
             link.click();
             URL.revokeObjectURL(link.href);
         });
@@ -2251,6 +3448,13 @@
 
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function isTruthyBoolean(value) {
+            if (typeof value === 'boolean') return value;
+            if (value === null || value === undefined) return false;
+            const normalized = String(value).trim().toLowerCase();
+            return normalized === 'true' || normalized === 't' || normalized === '1' || normalized === 'oui' || normalized === 'yes';
         }
 
         // ==================== TABS ====================
@@ -2285,41 +3489,117 @@
         // ==================== MAP ====================
         let map = null;
         let markers = null;
+        let mapDrawnItems = null;
+        let mapDrawnGeometry = null;
         let baseLayers = {};
 
         // Définition Lambert 93
         proj4.defs('EPSG:2154', '+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
 
-        function initializeMap() {
-            // Créer la carte centrée sur la Corse
-            map = L.map('map').setView([42.15, 9.1], 8);
+        function rowObservationLatLng(row) {
+            const x = parseFloat(row['Longitude (coordonnée x)']);
+            const y = parseFloat(row['Latitude (coordonnée y)']);
+            if (isNaN(x) || isNaN(y) || x === 0 || y === 0) return null;
+            try {
+                const [lon, lat] = proj4('EPSG:2154', 'EPSG:4326', [x, y]);
+                if (lat < 41 || lat > 44 || lon < 8 || lon > 10) return null;
+                return { lat, lng: lon };
+            } catch (e) {
+                return null;
+            }
+        }
 
-            // Fonds de carte
+        function pointInPolygonRing(lat, lng, ring) {
+            if (!ring || ring.length < 3) return false;
+            let inside = false;
+            for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                const yi = ring[i][0];
+                const xi = ring[i][1];
+                const yj = ring[j][0];
+                const xj = ring[j][1];
+                const intersect = ((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function pointInMapDrawnGeometry(lat, lng) {
+            if (!mapDrawnGeometry) return true;
+            if (mapDrawnGeometry.type === 'bounds') {
+                return mapDrawnGeometry.bounds.contains(L.latLng(lat, lng));
+            }
+            if (mapDrawnGeometry.type === 'polygon') {
+                return pointInPolygonRing(lat, lng, mapDrawnGeometry.latlngs);
+            }
+            return false;
+        }
+
+        function setMapDrawnGeometryFromLayer(layer) {
+            if (!layer) {
+                mapDrawnGeometry = null;
+                return;
+            }
+            if (layer instanceof L.Rectangle) {
+                mapDrawnGeometry = { type: 'bounds', bounds: layer.getBounds() };
+            } else if (layer instanceof L.Polygon) {
+                const ring = layer.getLatLngs()[0];
+                mapDrawnGeometry = { type: 'polygon', latlngs: ring.map((ll) => [ll.lat, ll.lng]) };
+            } else {
+                mapDrawnGeometry = null;
+            }
+        }
+
+        function clearMapDrawnZone() {
+            if (mapDrawnItems) {
+                mapDrawnItems.clearLayers();
+            }
+            mapDrawnGeometry = null;
+        }
+
+        function initializeMap() {
+            // Carte : zoom plus progressif (pas uniquement des entiers), molette plus douce, zoom max un cran au-delà des tuiles natives (mise à l’échelle)
+            map = L.map('map', {
+                zoomSnap: 0.25,
+                zoomDelta: 0.5,
+                wheelPxPerZoomLevel: 120,
+                minZoom: 3,
+                maxZoom: 20
+            }).setView([42.15, 9.1], 8);
+
+            // Fonds de carte (maxNativeZoom = résolution réelle des tuiles ; maxZoom = plafond carte avec sur-zoom si besoin)
             baseLayers = {
                 osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
+                    maxZoom: 20,
+                    maxNativeZoom: 19
                 }),
                 satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                     attribution: '© Esri',
-                    maxZoom: 18
+                    maxZoom: 20,
+                    maxNativeZoom: 18
                 }),
                 terrain: L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png', {
                     attribution: '© Stamen Design',
-                    maxZoom: 18
+                    maxZoom: 20,
+                    maxNativeZoom: 18
                 }),
                 topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenTopoMap',
-                    maxZoom: 17
+                    maxZoom: 20,
+                    maxNativeZoom: 17
                 }),
                 dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '© CartoDB',
-                    maxZoom: 19
+                    maxZoom: 20,
+                    maxNativeZoom: 19
                 })
             };
 
             // Ajouter le fond par défaut
             baseLayers.osm.addTo(map);
+
+            mapDrawnItems = new L.FeatureGroup();
+            map.addLayer(mapDrawnItems);
 
             // Créer le groupe de markers clusterisés
             markers = L.markerClusterGroup({
@@ -2327,6 +3607,45 @@
                 spiderfyOnMaxZoom: true,
                 showCoverageOnHover: false,
                 maxClusterRadius: 50
+            });
+            map.addLayer(markers);
+
+            if (typeof L.drawLocal !== 'undefined') {
+                L.drawLocal.draw.toolbar.buttons.polygon = 'Polygone';
+                L.drawLocal.draw.toolbar.buttons.rectangle = 'Rectangle';
+                L.drawLocal.draw.toolbar.undo = 'Annuler le dernier point';
+                L.drawLocal.draw.toolbar.finish = 'Terminer';
+                L.drawLocal.draw.toolbar.cancel = 'Annuler';
+            }
+
+            const drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
+                    polygon: {
+                        allowIntersection: false,
+                        shapeOptions: { color: '#1a5f4a', weight: 2, fillOpacity: 0.15 }
+                    },
+                    rectangle: {
+                        shapeOptions: { color: '#1a5f4a', weight: 2, fillOpacity: 0.15 }
+                    },
+                    polyline: false,
+                    circle: false,
+                    marker: false,
+                    circlemarker: false
+                },
+                edit: {
+                    featureGroup: mapDrawnItems,
+                    edit: false,
+                    remove: false
+                }
+            });
+            map.addControl(drawControl);
+
+            map.on('draw:created', function (e) {
+                mapDrawnItems.clearLayers();
+                mapDrawnItems.addLayer(e.layer);
+                setMapDrawnGeometryFromLayer(e.layer);
+                applyMapFilters();
             });
 
             // Ajouter les points
@@ -2343,28 +3662,44 @@
 
             // Event listeners pour les filtres
             document.getElementById('mapProjectFilter').addEventListener('change', applyMapFilters);
+            document.getElementById('mapYearFilter').addEventListener('change', applyMapFilters);
             document.getElementById('mapSpeciesFilter').addEventListener('change', applyMapFilters);
+            document.getElementById('mapGroupFilter').addEventListener('change', applyMapFilters);
             
             // Setup autocomplete pour observateur
             setupMapObserverAutocomplete();
+
+            document.getElementById('clearMapDrawZone').addEventListener('click', () => {
+                clearMapDrawnZone();
+                applyMapFilters();
+            });
             
             // Reset des filtres de la carte
             document.getElementById('resetMapFilters').addEventListener('click', () => {
                 document.getElementById('mapProjectFilter').value = '';
+                document.getElementById('mapYearFilter').value = '';
                 const obsInput = document.getElementById('mapObserverFilter');
                 obsInput.value = '';
                 obsInput.classList.remove('has-value');
                 document.getElementById('mapSpeciesFilter').value = '';
+                document.getElementById('mapGroupFilter').value = '';
                 document.getElementById('observerDropdown').classList.remove('active');
+                clearMapDrawnZone();
                 // Réappliquer les filtres (sans les filtres carte, donc juste les filtres recherche)
                 applyMapFilters();
             });
         }
 
+        function getTaxonomicGroupForSinpRow(row) {
+            return getEffectiveGroupeForSinpRow(row);
+        }
+
         function applyMapFilters() {
             const projectFilter = document.getElementById('mapProjectFilter').value;
+            const yearFilter = document.getElementById('mapYearFilter').value;
             const observerFilter = document.getElementById('mapObserverFilter').value;
             const speciesFilter = document.getElementById('mapSpeciesFilter').value;
+            const groupFilter = document.getElementById('mapGroupFilter').value;
             
             // Appliquer les filtres de la carte sur filteredData ET mettre à jour la table
             // Partir des données de base filtrées par la recherche
@@ -2386,7 +3721,7 @@
                     return searchFilters.every(filter => {
                         if (filter.column) {
                             const val = row[filter.column];
-                            return val && String(val).toLowerCase().includes(filter.value);
+                            return val !== null && val !== undefined && String(val).toLowerCase().includes(filter.value);
                         } else {
                             const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
                             return searchCols.some(col => {
@@ -2402,6 +3737,9 @@
             if (projectFilter) {
                 baseData = baseData.filter(row => row['Cadre_Acquisition'] === projectFilter);
             }
+            if (yearFilter) {
+                baseData = baseData.filter(row => parseYearFromJourDate(row['jourdateDebut']) === yearFilter);
+            }
             if (observerFilter) {
                 const searchTerm = observerFilter.toLowerCase();
                 baseData = baseData.filter(row => {
@@ -2411,6 +3749,16 @@
             }
             if (speciesFilter) {
                 baseData = baseData.filter(row => row['nomCite'] === speciesFilter || row['nomvalide(R)'] === speciesFilter);
+            }
+            if (groupFilter) {
+                baseData = baseData.filter(row => getTaxonomicGroupForSinpRow(row) === groupFilter);
+            }
+            if (mapDrawnGeometry) {
+                baseData = baseData.filter(row => {
+                    const ll = rowObservationLatLng(row);
+                    if (!ll) return false;
+                    return pointInMapDrawnGeometry(ll.lat, ll.lng);
+                });
             }
             
             // Mettre à jour filteredData
@@ -2432,59 +3780,46 @@
             let dataToShow = filteredData;
 
             dataToShow.forEach(row => {
-                const x = parseFloat(row['Longitude (coordonnée x)']);
-                const y = parseFloat(row['Latitude (coordonnée y)']);
-                
-                if (!isNaN(x) && !isNaN(y) && x !== 0 && y !== 0) {
-                    try {
-                        // Convertir Lambert 93 en WGS84
-                        const [lon, lat] = proj4('EPSG:2154', 'EPSG:4326', [x, y]);
-                        
-                        if (lat >= 41 && lat <= 44 && lon >= 8 && lon <= 10) { // Corse
-                            const marker = L.circleMarker([lat, lon], {
-                                radius: 6,
-                                fillColor: '#1a5f4a',
-                                color: '#ffffff',
-                                weight: 2,
-                                opacity: 1,
-                                fillOpacity: 0.8
-                            });
+                const ll = rowObservationLatLng(row);
+                if (!ll) return;
+                const { lat, lng: lon } = ll;
+                const marker = L.circleMarker([lat, lon], {
+                    radius: 6,
+                    fillColor: '#1a5f4a',
+                    color: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
 
-                            // Popup
-                            const species = row['nomCite'] || 'Non renseigné';
-                            const date = row['jourdateDebut'] || 'Non renseignée';
-                            const project = row['Cadre_Acquisition'] || 'Non renseigné';
-                            const observer = row['observateurIdentite'] || 'Non renseigné';
+                const species = row['nomCite'] || 'Non renseigné';
+                const date = row['jourdateDebut'] || 'Non renseignée';
+                const project = row['Cadre_Acquisition'] || 'Non renseigné';
+                const observer = row['observateurIdentite'] || 'Non renseigné';
 
-                            marker.bindPopup(`
-                                <div class="popup-content">
-                                    <div class="popup-species">${species}</div>
-                                    <div class="popup-info">
-                                        <span><strong>Date :</strong> ${date}</span>
-                                        <span><strong>Observateur :</strong> ${observer}</span>
-                                        <span><strong>Projet :</strong> ${project}</span>
-                                    </div>
-                                </div>
-                            `);
+                marker.bindPopup(`
+                    <div class="popup-content">
+                        <div class="popup-species">${species}</div>
+                        <div class="popup-info">
+                            <span><strong>Date :</strong> ${date}</span>
+                            <span><strong>Observateur :</strong> ${observer}</span>
+                            <span><strong>Projet :</strong> ${project}</span>
+                        </div>
+                    </div>
+                `);
 
-                            markers.addLayer(marker);
-                            pointCount++;
-                        }
-                    } catch (e) {
-                        // Erreur de conversion, ignorer le point
-                    }
-                }
+                markers.addLayer(marker);
+                pointCount++;
             });
 
-            map.addLayer(markers);
-
-            // Ajuster la vue si des points existent
-            if (pointCount > 0 && markers.getBounds().isValid()) {
+            // Ajuster la vue si des points existent (sauf si une zone est dessinée : garder le cadrage)
+            if (pointCount > 0 && markers.getBounds().isValid() && !mapDrawnGeometry) {
                 map.fitBounds(markers.getBounds(), { padding: [20, 20] });
             }
 
             // Mettre à jour les stats
-            document.getElementById('mapStats').innerHTML = `<strong>${pointCount.toLocaleString('fr-FR')}</strong> observations géolocalisées`;
+            const zoneHint = mapDrawnGeometry ? ' <span style="font-weight:400;opacity:.85">(dans la zone dessinée)</span>' : '';
+            document.getElementById('mapStats').innerHTML = `<strong>${pointCount.toLocaleString('fr-FR')}</strong> observations géolocalisées${zoneHint}`;
         }
 
         // Liste des observateurs pour l'autocomplete
@@ -2511,6 +3846,21 @@
                 projectSelect.appendChild(option);
             });
 
+            // Années (même logique que la colonne ANNEE : date de début d’observation)
+            const yearSelect = document.getElementById('mapYearFilter');
+            while (yearSelect.options.length > 1) yearSelect.remove(1);
+            const years = new Set();
+            allData.forEach(row => {
+                const y = parseYearFromJourDate(row['jourdateDebut']);
+                if (y) years.add(y);
+            });
+            Array.from(years).sort((a, b) => b.localeCompare(a)).forEach(y => {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                yearSelect.appendChild(option);
+            });
+
             // Observateurs - construire la liste pour l'autocomplete
             const observers = new Set();
             allData.forEach(row => {
@@ -2532,6 +3882,22 @@
                 option.textContent = sp.length > 35 ? sp.substring(0, 35) + '...' : sp;
                 option.title = sp;
                 speciesSelect.appendChild(option);
+            });
+
+            // Groupes : même source que la colonne GROUPE (vue + TaxRef si trou dans la vue)
+            const groupSelect = document.getElementById('mapGroupFilter');
+            while (groupSelect.options.length > 1) groupSelect.remove(1);
+            const groups = new Set();
+            allData.forEach(row => {
+                const g = getEffectiveGroupeForSinpRow(row);
+                if (g) groups.add(g);
+            });
+            Array.from(groups).sort((a, b) => a.localeCompare(b, 'fr')).forEach(g => {
+                const option = document.createElement('option');
+                option.value = g;
+                option.textContent = g.length > 35 ? g.substring(0, 35) + '...' : g;
+                option.title = g;
+                groupSelect.appendChild(option);
             });
         }
 
