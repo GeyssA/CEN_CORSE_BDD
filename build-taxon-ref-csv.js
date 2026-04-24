@@ -19,20 +19,23 @@ function normalizeVernacular(s) {
     .trim();
 }
 
-const REPTILE_ORDERS = new Set(['Squamata', 'Chelonii', 'Testudines', 'Crocodylia', 'Rhynchocephalia', 'Serpentes']);
+const REPTILE_ORDERS = new Set(['squamata', 'chelonii', 'testudines', 'crocodylia', 'rhynchocephalia', 'serpentes']);
 
 function getGroup(kingdom, clazz, order) {
-  if (kingdom === 'Plantae') return 'Plantes';
-  if (clazz === 'Amphibia') return 'Amphibiens';
-  if (clazz === 'Reptilia') return 'Reptiles';
-  if ((clazz && REPTILE_ORDERS.has(clazz)) || (order && REPTILE_ORDERS.has(order))) return 'Reptiles';
-  if (clazz === 'Aves') return 'Oiseaux';
-  if (clazz === 'Arachnida') return 'Arachnides';
-  if (clazz === 'Mammalia') return 'Mammifères';
-  if (['Actinopterygii', 'Chondrichthyes', 'Sarcopterygii', 'Petromyzonti', 'Myxini'].includes(clazz)) return 'Poissons';
-  if (order === 'Lepidoptera') return 'Lépidoptères';
-  if (order === 'Odonata') return 'Odonates';
-  if (order === 'Orthoptera') return 'Orthoptères';
+  const k = String(kingdom || '').trim().toLowerCase();
+  const c = String(clazz || '').trim().toLowerCase();
+  const o = String(order || '').trim().toLowerCase();
+  if (k === 'plantae') return 'Plantes';
+  if (c === 'amphibia') return 'Amphibiens';
+  if (c === 'reptilia') return 'Reptiles';
+  if ((c && REPTILE_ORDERS.has(c)) || (o && REPTILE_ORDERS.has(o))) return 'Reptiles';
+  if (c === 'aves') return 'Oiseaux';
+  if (c === 'arachnida') return 'Arachnides';
+  if (c === 'mammalia') return 'Mammifères';
+  if (['actinopterygii', 'chondrichthyes', 'sarcopterygii', 'petromyzonti', 'myxini'].includes(c)) return 'Poissons';
+  if (o === 'lepidoptera') return 'Lépidoptères';
+  if (o === 'odonata') return 'Odonates';
+  if (o === 'orthoptera') return 'Orthoptères';
   return '';
 }
 
@@ -97,6 +100,8 @@ async function buildCsv(inputPath, outputPath) {
       acceptednameusage: acceptedNameUsage,
       vernacularname: vernacularName,
       group_label: groupLabel,
+      tax_class: (cols[idx.class] || '').trim(),
+      tax_order: (cols[idx.order] || '').trim(),
       scientificnameid: (cols[idx.scientificNameID] || '').trim(),
       acceptednameusageid: (cols[idx.acceptedNameUsageID] || '').trim()
     });
@@ -108,6 +113,8 @@ async function buildCsv(inputPath, outputPath) {
     'acceptednameusage',
     'vernacularname',
     'group_label',
+    'tax_class',
+    'tax_order',
     'scientificnameid',
     'acceptednameusageid'
   ];

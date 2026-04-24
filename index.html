@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --primary: #1f4c7a;
@@ -1404,6 +1405,258 @@
             color: var(--text-muted);
         }
 
+        /* Analytics */
+        .analytics-section {
+            background: var(--bg-card);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(26, 95, 74, 0.12);
+            border: 1px solid var(--border);
+            padding: 0.9rem;
+            min-height: calc(100vh - 135px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .analytics-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+
+        .analytics-controls .map-control-group label {
+            font-size: 0.72rem;
+        }
+
+        .analytics-controls .map-control-group select {
+            min-width: 120px;
+        }
+
+        .analytics-subtabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.45rem;
+        }
+
+        .analytics-subtab-btn {
+            border: 1px solid var(--border);
+            background: #f7fbff;
+            color: var(--text-secondary);
+            border-radius: 7px;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.73rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .analytics-subtab-btn:hover {
+            border-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .analytics-subtab-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .analytics-subtab-content {
+            display: none;
+        }
+
+        .analytics-subtab-content.active {
+            display: block;
+        }
+
+        .analytics-kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 0.6rem;
+        }
+
+        .analytics-kpi {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: linear-gradient(180deg, #fff, #f8fbff);
+            padding: 0.6rem 0.7rem;
+        }
+
+        .analytics-kpi .kpi-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .analytics-kpi .kpi-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-top: 0.15rem;
+        }
+
+        .analytics-insights {
+            border: 1px solid var(--border-light);
+            border-left: 4px solid var(--primary);
+            border-radius: 7px;
+            padding: 0.55rem 0.65rem;
+            background: #f8fbff;
+            font-size: 0.77rem;
+            color: var(--text-secondary);
+        }
+
+        .group-species-detail {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: #fff;
+            padding: 0.55rem;
+        }
+
+        .group-species-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .group-species-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .group-species-btn {
+            border: 1px solid var(--border);
+            background: #f7fbff;
+            color: var(--text-secondary);
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .group-species-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .species-name-list {
+            max-height: 120px;
+            overflow: auto;
+            border-top: 1px dashed var(--border-light);
+            margin-top: 0.4rem;
+            padding-top: 0.4rem;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 0.7rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .analytics-card {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: white;
+            padding: 0.62rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 260px;
+            box-shadow: 0 3px 12px rgba(18, 50, 82, 0.08);
+        }
+
+        .analytics-card h3 {
+            margin: 0 0 0.4rem 0;
+            font-size: 0.78rem;
+            color: var(--text-primary);
+        }
+
+        .analytics-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .analytics-card-subtitle {
+            margin: -0.15rem 0 0.4rem 0;
+            color: var(--text-muted);
+            font-size: 0.68rem;
+        }
+
+        .custom-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .custom-builder-panel {
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            background: linear-gradient(180deg, #fcfdff, #f7fbff);
+            padding: 0.6rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .custom-chart-editor {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.55rem;
+            padding: 0.55rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-light);
+            border-radius: 7px;
+            background: #fbfdff;
+        }
+
+        .btn-icon {
+            border: 1px solid #e4bcbc;
+            background: #fff3f3;
+            color: #8d2d2d;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.45rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-icon:hover {
+            background: #ffdede;
+            border-color: #e3a3a3;
+        }
+
+        .analytics-chart-wrap {
+            position: relative;
+            height: 320px;
+            min-height: 320px;
+        }
+
+        .analytics-chart-wrap canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .search-form { flex-direction: column; }
@@ -1411,6 +1664,7 @@
             .btn { width: 100%; justify-content: center; }
             .results-header { flex-direction: column; }
             .pagination { justify-content: center; width: 100%; }
+            .analytics-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -1496,6 +1750,13 @@
                     <circle cx="12" cy="10" r="3"></circle>
                 </svg>
                 Visualiser sur la carte
+            </button>
+            <button class="tab-btn" data-tab="analytics">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"></path>
+                    <path d="M7 14l4-4 3 3 5-6"></path>
+                </svg>
+                Analyses
             </button>
         </div>
 
@@ -1657,6 +1918,106 @@
                 <div id="map"></div>
             </section>
         </div><!-- End tab-map -->
+
+        <!-- TAB 3: ANALYTICS -->
+        <div class="tab-content" id="tab-analytics">
+            <section class="analytics-section">
+                <div class="analytics-header">
+                    <div class="map-stats">
+                        <span id="analyticsScopeInfo">Analyse sur les observations filtrées.</span>
+                    </div>
+                    <div class="analytics-controls">
+                        <div class="map-control-group">
+                            <label for="analyticsScope">Périmètre :</label>
+                            <select id="analyticsScope">
+                                <option value="search">Filtres recherche</option>
+                                <option value="map" selected>Filtres carte</option>
+                                <option value="map-zone">Carte + zone dessinée</option>
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label for="analyticsYear">Année :</label>
+                            <select id="analyticsYear">
+                                <option value="">Toutes</option>
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label for="analyticsZoneField">Zone :</label>
+                            <select id="analyticsZoneField">
+                                <option value="nomCommune">Commune</option>
+                                <option value="Cadre_Acquisition">Projet</option>
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label for="analyticsTopN">Top :</label>
+                            <select id="analyticsTopN">
+                                <option value="8">8</option>
+                                <option value="12" selected>12</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label for="analyticsGroupFilter">Groupe :</label>
+                            <select id="analyticsGroupFilter">
+                                <option value="">Tous</option>
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label for="analyticsSpeciesFilter">Espèce :</label>
+                            <select id="analyticsSpeciesFilter">
+                                <option value="">Toutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-kpis">
+                    <div class="analytics-kpi"><div class="kpi-label">Observations</div><div class="kpi-value" id="kpiObservations">-</div></div>
+                    <div class="analytics-kpi"><div class="kpi-label">Espèces uniques</div><div class="kpi-value" id="kpiSpecies">-</div></div>
+                    <div class="analytics-kpi"><div class="kpi-label">Individus estimés</div><div class="kpi-value" id="kpiIndividuals">-</div></div>
+                    <div class="analytics-kpi"><div class="kpi-label">Couples observés</div><div class="kpi-value" id="kpiCouples">-</div></div>
+                </div>
+                <div class="analytics-insights" id="analyticsInsights">Chargement des indicateurs…</div>
+                <div class="group-species-detail">
+                    <div class="group-species-header">
+                        <strong style="font-size:0.78rem;">Espèces par groupe (cliquer pour le détail)</strong>
+                        <span id="groupSpeciesDetailTitle" style="font-size:0.72rem;color:var(--text-muted);">Aucun groupe sélectionné</span>
+                    </div>
+                    <div class="group-species-buttons" id="groupSpeciesButtons"></div>
+                    <div class="species-name-list" id="groupSpeciesNames">Cliquez un groupe pour afficher les espèces.</div>
+                </div>
+                <div class="analytics-subtabs">
+                    <button type="button" class="analytics-subtab-btn active" data-analytics-subtab="fixed">Graphes figés</button>
+                    <button type="button" class="analytics-subtab-btn" data-analytics-subtab="custom">Graphes personnalisés</button>
+                </div>
+                <div class="analytics-subtab-content active" id="analytics-subtab-fixed">
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>Richesse spécifique par zone</h3>
+                            <div class="analytics-card-subtitle">Nombre d'espèces uniques par commune/projet (Top N)</div>
+                            <div class="analytics-chart-wrap">
+                                <canvas id="chartSpeciesByZone"></canvas>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Phénologie mensuelle (individus / couples)</h3>
+                            <div class="analytics-card-subtitle">Evolution sur l'année pour le périmètre filtré</div>
+                            <div class="analytics-chart-wrap">
+                                <canvas id="chartPhenology"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-subtab-content" id="analytics-subtab-custom">
+                    <div class="custom-builder-panel">
+                        <div class="analytics-controls">
+                            <button type="button" class="btn btn-primary" id="analyticsCreateAnotherChart">Creer un autre graphe</button>
+                        </div>
+                    </div>
+                    <div class="custom-charts-grid" id="customChartsGrid"></div>
+                    <div class="analytics-insights">Astuce : chaque modale de graphe est independante et se met a jour en direct quand vous changez ses parametres.</div>
+                </div>
+            </section>
+        </div><!-- End tab-analytics -->
     </main>
 
     <footer>
@@ -1873,6 +2234,10 @@
         let taxonRefMembersByAccepted = new Map();
         /** vernaculaire issu de la colonne vernacularname de taxon_ref */
         let taxonRefVernacularById = new Map();
+        /** groupe taxonomique issu de taxon_ref.group_label (sid -> groupe) */
+        let taxonRefGroupLabelById = new Map();
+        /** groupe taxonomique inféré depuis taxon_ref.class/order (sid -> groupe) */
+        let taxonRefInferredGroupById = new Map();
         /** par groupe d’espèce acceptée : premier vernaculaire trouvé parmi les membres */
         let taxonRefGroupVernacular = new Map();
         let currentPage = 1;
@@ -2210,11 +2575,39 @@
         /** Vue SQL (GROUPE) si présent, sinon groupe TaxRef (cdNom / nom) — même logique pour tous les taxons. */
         function mergeGroupeFromDbAndLookup(gDbRaw, sinpRow) {
             const gDb = String(gDbRaw ?? '').trim();
+            const cdNom = String(sinpRow['cdNom'] ?? '').trim();
             const nomCite = sinpRow['nomCite'];
             const nomValide = sinpRow['nomvalide(R)'];
             const nomTaxonSource = (nomCite && String(nomCite).trim()) ? nomCite : nomValide;
             const gLookup = getTaxonInfoForName(nomTaxonSource, sinpRow['cdNom']).group ?? '';
-            return normalizeTaxonomicGroupLabel(gDb || gLookup);
+            const clazzFromSinp = String(
+                sinpRow['class']
+                ?? sinpRow['Class']
+                ?? sinpRow['classe']
+                ?? sinpRow['Classe']
+                ?? sinpRow['tax_class']
+                ?? ''
+            ).trim();
+            const orderFromSinp = String(
+                sinpRow['order']
+                ?? sinpRow['Order']
+                ?? sinpRow['ordre']
+                ?? sinpRow['Ordre']
+                ?? sinpRow['tax_order']
+                ?? ''
+            ).trim();
+            const gSinpTax = getGroupFromTaxon('', clazzFromSinp, orderFromSinp);
+            const gTaxonRef = cdNom ? (
+                taxonRefGroupLabelById.get(cdNom)
+                || taxonRefGroupLabelById.get(taxonRefAcceptedNameUsageByScientificId.get(cdNom))
+                || ''
+            ) : '';
+            const gTaxonRefInferred = cdNom ? (
+                taxonRefInferredGroupById.get(cdNom)
+                || taxonRefInferredGroupById.get(taxonRefAcceptedNameUsageByScientificId.get(cdNom))
+                || ''
+            ) : '';
+            return normalizeTaxonomicGroupLabel(gDb || gTaxonRef || gTaxonRefInferred || gLookup || gSinpTax);
         }
 
         function getEffectiveGroupeForSinpRow(sinpRow) {
@@ -2511,7 +2904,9 @@
         /** Harmonise les variantes « reptiles » avec le même style que Amphibiens, Oiseaux… */
         function normalizeTaxonomicGroupLabel(g) {
             const s = String(g ?? '').trim();
-            if (s.toLowerCase() === 'reptiles') return 'Reptiles';
+            const low = s.toLowerCase();
+            if (low === 'reptiles' || low === 'reptile') return 'Reptiles';
+            if (low === 'squamata' || low === 'serpentes' || low === 'testudines' || low === 'chelonii' || low === 'crocodylia' || low === 'rhynchocephalia') return 'Reptiles';
             return s;
         }
 
@@ -2522,6 +2917,8 @@
             taxonRefAcceptedNameUsageByScientificId = new Map();
             taxonRefMembersByAccepted = new Map();
             taxonRefVernacularById = new Map();
+            taxonRefGroupLabelById = new Map();
+            taxonRefInferredGroupById = new Map();
             taxonRefGroupVernacular = new Map();
             let from = 0;
             const batchSize = 1000;
@@ -2530,7 +2927,7 @@
                 while (hasMore) {
                     const { data, error } = await supabaseClient
                         .from(TABLE_NAME_TAXON_REF)
-                        .select('scientificnameid, acceptednameusageid, vernacularname, group_label')
+                        .select('scientificnameid, acceptednameusageid, vernacularname, group_label, tax_class:class, tax_order:order')
                         .range(from, from + batchSize - 1);
                     if (error) throw error;
                     if (!data || data.length === 0) {
@@ -2549,6 +2946,17 @@
                         if (!taxonRefMembersByAccepted.has(accStr)) taxonRefMembersByAccepted.set(accStr, new Set());
                         taxonRefMembersByAccepted.get(accStr).add(sid);
                         if (accStr !== sid) taxonRefAcceptedByScientificId.set(sid, accStr);
+                        const gRaw = String(row.group_label ?? row.groupLabel ?? '').trim();
+                        const gNorm = normalizeTaxonomicGroupLabel(gRaw);
+                        if (gNorm && !taxonRefGroupLabelById.has(sid)) {
+                            taxonRefGroupLabelById.set(sid, gNorm);
+                        }
+                        const clazz = String(row.tax_class ?? '').trim();
+                        const order = String(row.tax_order ?? '').trim();
+                        const gInf = normalizeTaxonomicGroupLabel(getGroupFromTaxon('', clazz, order));
+                        if (gInf && !taxonRefInferredGroupById.has(sid)) {
+                            taxonRefInferredGroupById.set(sid, gInf);
+                        }
                         const rawV = String(row.vernacularname ?? row.vernacularName ?? '').trim();
                         if (rawV && !taxonRefVernacularById.has(sid)) {
                             const first = rawV.split(',')[0].trim();
@@ -2565,6 +2973,8 @@
                 taxonRefAcceptedNameUsageByScientificId = new Map();
                 taxonRefMembersByAccepted = new Map();
                 taxonRefVernacularById = new Map();
+                taxonRefGroupLabelById = new Map();
+                taxonRefInferredGroupById = new Map();
             }
         }
 
@@ -2785,6 +3195,9 @@
                         showApp();
                         updateViewModeHint();
                         displayResults();
+                        populateAnalyticsYears();
+                        setupAnalyticsControls();
+                        refreshAnalytics();
                     }
                 }, 500);
 
@@ -3100,6 +3513,8 @@
             // Synchroniser avec la carte si elle est initialisée
             if (typeof map !== 'undefined' && map) {
                 applyMapFilters();
+            } else {
+                refreshAnalytics();
             }
         }
 
@@ -3160,6 +3575,8 @@
                 if (dropdown) dropdown.classList.remove('active');
                 if (typeof clearMapDrawnZone === 'function') clearMapDrawnZone();
                 applyMapFilters();
+            } else {
+                refreshAnalytics();
             }
         });
 
@@ -3483,6 +3900,9 @@
                     initializeMap();
                     mapInitialized = true;
                 }
+                if (targetTab === 'analytics') {
+                    refreshAnalytics();
+                }
             });
         });
 
@@ -3492,6 +3912,42 @@
         let mapDrawnItems = null;
         let mapDrawnGeometry = null;
         let baseLayers = {};
+        let analyticsCharts = {
+            speciesByZone: null,
+            phenology: null,
+            custom: new Map()
+        };
+        let analyticsSelectedGroupDetail = '';
+        let analyticsCustomChartCounter = 0;
+        let analyticsCustomChartConfigs = [];
+        const ANALYTICS_X_OPTIONS = [
+            { value: 'month', label: 'Mois' },
+            { value: 'year', label: 'Annee' },
+            { value: 'group', label: 'Groupe' },
+            { value: 'species', label: 'Espece' },
+            { value: 'lifeStage', label: 'Stade de vie' },
+            { value: 'commune', label: 'Commune' },
+            { value: 'project', label: 'Projet' }
+        ];
+        const ANALYTICS_Y_OPTIONS = [
+            { value: 'count', label: 'Nb donnees' },
+            { value: 'individuals', label: 'Nb individus estimes' },
+            { value: 'couples', label: 'Nb couples' },
+            { value: 'uniqueSpecies', label: 'Nb especes uniques' }
+        ];
+        const ANALYTICS_GROUP_OPTIONS = [
+            { value: '', label: 'Aucun' },
+            { value: 'group', label: 'Groupe taxonomique' },
+            { value: 'species', label: 'Espece' },
+            { value: 'lifeStage', label: 'Stade de vie' },
+            { value: 'commune', label: 'Commune' },
+            { value: 'project', label: 'Projet' },
+            { value: 'year', label: 'Annee' }
+        ];
+        const ANALYTICS_TYPE_OPTIONS = [
+            { value: 'bar', label: 'Barres' },
+            { value: 'line', label: 'Ligne' }
+        ];
 
         // Définition Lambert 93
         proj4.defs('EPSG:2154', '+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
@@ -3694,52 +4150,42 @@
             return getEffectiveGroupeForSinpRow(row);
         }
 
-        function applyMapFilters() {
+        function extractSearchFilteredData() {
+            const searchFilters = [];
+            document.querySelectorAll('.filter-row').forEach(row => {
+                const column = row.querySelector('.filter-column').value;
+                const value = row.querySelector('.filter-search').value.trim().toLowerCase();
+                if (value) searchFilters.push({ column, value });
+            });
+
+            if (searchFilters.length === 0) return [...allData];
+
+            return allData.filter(row => {
+                return searchFilters.every(filter => {
+                    if (filter.column) {
+                        const val = row[filter.column];
+                        return val !== null && val !== undefined && String(val).toLowerCase().includes(filter.value);
+                    }
+                    const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
+                    return searchCols.some(col => {
+                        const val = row[col];
+                        return val && String(val).toLowerCase().includes(filter.value);
+                    });
+                });
+            });
+        }
+
+        function extractMapFilteredData(includeZone = true) {
             const projectFilter = document.getElementById('mapProjectFilter').value;
             const yearFilter = document.getElementById('mapYearFilter').value;
             const observerFilter = document.getElementById('mapObserverFilter').value;
             const speciesFilter = document.getElementById('mapSpeciesFilter').value;
             const groupFilter = document.getElementById('mapGroupFilter').value;
-            
-            // Appliquer les filtres de la carte sur filteredData ET mettre à jour la table
-            // Partir des données de base filtrées par la recherche
-            let baseData = allData;
-            
-            // Récupérer les filtres de recherche actifs
-            const searchFilters = [];
-            document.querySelectorAll('.filter-row').forEach(row => {
-                const column = row.querySelector('.filter-column').value;
-                const value = row.querySelector('.filter-search').value.trim().toLowerCase();
-                if (value) {
-                    searchFilters.push({ column, value });
-                }
-            });
-            
-            // Appliquer les filtres de recherche
-            if (searchFilters.length > 0) {
-                baseData = baseData.filter(row => {
-                    return searchFilters.every(filter => {
-                        if (filter.column) {
-                            const val = row[filter.column];
-                            return val !== null && val !== undefined && String(val).toLowerCase().includes(filter.value);
-                        } else {
-                            const searchCols = ['nomCite', 'nomvalide(R)', 'cdNom', 'nomCommune', 'observateurIdentite', 'source_fichier'];
-                            return searchCols.some(col => {
-                                const val = row[col];
-                                return val && String(val).toLowerCase().includes(filter.value);
-                            });
-                        }
-                    });
-                });
-            }
-            
-            // Appliquer les filtres de la carte
-            if (projectFilter) {
-                baseData = baseData.filter(row => row['Cadre_Acquisition'] === projectFilter);
-            }
-            if (yearFilter) {
-                baseData = baseData.filter(row => parseYearFromJourDate(row['jourdateDebut']) === yearFilter);
-            }
+
+            let baseData = extractSearchFilteredData();
+
+            if (projectFilter) baseData = baseData.filter(row => row['Cadre_Acquisition'] === projectFilter);
+            if (yearFilter) baseData = baseData.filter(row => parseYearFromJourDate(row['jourdateDebut']) === yearFilter);
             if (observerFilter) {
                 const searchTerm = observerFilter.toLowerCase();
                 baseData = baseData.filter(row => {
@@ -3747,20 +4193,22 @@
                     return obs && obs.toLowerCase().includes(searchTerm);
                 });
             }
-            if (speciesFilter) {
-                baseData = baseData.filter(row => row['nomCite'] === speciesFilter || row['nomvalide(R)'] === speciesFilter);
-            }
-            if (groupFilter) {
-                baseData = baseData.filter(row => getTaxonomicGroupForSinpRow(row) === groupFilter);
-            }
-            if (mapDrawnGeometry) {
+            if (speciesFilter) baseData = baseData.filter(row => row['nomCite'] === speciesFilter || row['nomvalide(R)'] === speciesFilter);
+            if (groupFilter) baseData = baseData.filter(row => getTaxonomicGroupForSinpRow(row) === groupFilter);
+            if (includeZone && mapDrawnGeometry) {
                 baseData = baseData.filter(row => {
                     const ll = rowObservationLatLng(row);
                     if (!ll) return false;
                     return pointInMapDrawnGeometry(ll.lat, ll.lng);
                 });
             }
-            
+
+            return baseData;
+        }
+
+        function applyMapFilters() {
+            const baseData = extractMapFilteredData(true);
+
             // Mettre à jour filteredData
             filteredData = baseData;
             
@@ -3770,6 +4218,7 @@
             
             // Mettre à jour la carte
             loadMapPoints();
+            refreshAnalytics();
         }
 
         function loadMapPoints() {
@@ -4000,6 +4449,641 @@
                 if (!e.target.closest('.map-autocomplete-wrapper')) {
                     dropdown.classList.remove('active');
                 }
+            });
+        }
+
+        function getMonthFromJourDate(jourdateDebut) {
+            if (jourdateDebut === null || jourdateDebut === undefined) return '';
+            const s = String(jourdateDebut).trim();
+            if (!s) return '';
+            const iso = s.match(/^\d{4}-(\d{2})-\d{2}/);
+            if (iso) return iso[1];
+            const dmy = s.match(/^\d{1,2}[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+            if (dmy) return String(dmy[1]).padStart(2, '0');
+            return '';
+        }
+
+        function parsePositiveCount(value) {
+            const n = Number(value);
+            if (!Number.isFinite(n) || n < 0) return 0;
+            return n;
+        }
+
+        function getEstimatedIndividuals(row) {
+            const minVal = parsePositiveCount(row['denombrementMin']);
+            const maxVal = parsePositiveCount(row['denombrementMax']);
+            if (maxVal > 0 && minVal > 0) return Math.round((minVal + maxVal) / 2);
+            if (maxVal > 0) return maxVal;
+            if (minVal > 0) return minVal;
+            return 1;
+        }
+
+        function getCountType(row) {
+            return decodeObjetDenombrementToType(row['objetDenombrement'], row['nomCite'] || row['nomvalide(R)']) || 'Individu';
+        }
+
+        function destroyAnalyticsCharts() {
+            if (analyticsCharts.speciesByZone) analyticsCharts.speciesByZone.destroy();
+            if (analyticsCharts.phenology) analyticsCharts.phenology.destroy();
+            if (analyticsCharts.custom) {
+                analyticsCharts.custom.forEach(chart => chart.destroy());
+                analyticsCharts.custom.clear();
+            }
+            analyticsCharts.speciesByZone = null;
+            analyticsCharts.phenology = null;
+            analyticsCharts.custom = new Map();
+        }
+
+        function populateAnalyticsYears() {
+            const yearSelect = document.getElementById('analyticsYear');
+            if (!yearSelect) return;
+            while (yearSelect.options.length > 1) yearSelect.remove(1);
+            const years = new Set();
+            allData.forEach(row => {
+                const y = parseYearFromJourDate(row['jourdateDebut']);
+                if (y) years.add(y);
+            });
+            Array.from(years).sort((a, b) => b.localeCompare(a)).forEach(y => {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                yearSelect.appendChild(option);
+            });
+        }
+
+        function setupAnalyticsControls() {
+            ['analyticsScope', 'analyticsYear', 'analyticsZoneField', 'analyticsTopN', 'analyticsGroupFilter', 'analyticsSpeciesFilter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', refreshAnalytics);
+            });
+
+            const addBtn = document.getElementById('analyticsCreateAnotherChart');
+            if (addBtn) {
+                addBtn.addEventListener('click', () => {
+                    analyticsCustomChartCounter += 1;
+                    analyticsCustomChartConfigs.push({
+                        id: `custom-${analyticsCustomChartCounter}`,
+                        xAxis: 'month',
+                        yAxis: 'count',
+                        chartType: 'bar',
+                        groupBy: ''
+                    });
+                    refreshAnalytics();
+                });
+            }
+
+            document.querySelectorAll('.analytics-subtab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.analyticsSubtab;
+                    document.querySelectorAll('.analytics-subtab-btn').forEach(other => other.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.analytics-subtab-content').forEach(content => {
+                        content.classList.toggle('active', content.id === `analytics-subtab-${target}`);
+                    });
+                });
+            });
+        }
+
+        function getAnalyticsAxisLabel(axis) {
+            const labels = {
+                month: 'Mois',
+                year: 'Annee',
+                group: 'Groupe',
+                species: 'Espece',
+                lifeStage: 'Stade de vie',
+                commune: 'Commune',
+                project: 'Projet'
+            };
+            return labels[axis] || axis;
+        }
+
+        function getAnalyticsYLabel(yAxis) {
+            const yLabelMap = {
+                count: 'Nb donnees',
+                individuals: 'Nb individus estimes',
+                couples: 'Nb couples',
+                uniqueSpecies: 'Nb especes uniques'
+            };
+            return yLabelMap[yAxis] || 'Valeur';
+        }
+
+        function truncateLabel(label) {
+            const clean = String(label || 'NR');
+            return clean.length > 28 ? `${clean.slice(0, 28)}...` : clean;
+        }
+
+        function renderSelectOptions(options, selectedValue) {
+            return options.map(option => (
+                `<option value="${escapeHtml(option.value)}"${option.value === selectedValue ? ' selected' : ''}>${escapeHtml(option.label)}</option>`
+            )).join('');
+        }
+
+        function renderCustomChartsCards() {
+            const host = document.getElementById('customChartsGrid');
+            if (!host) return;
+            if (analyticsCustomChartConfigs.length === 0) {
+                host.innerHTML = '<div class="analytics-insights">Aucun graphe personnalise. Cliquez sur "Creer un autre graphe" pour ajouter une modale.</div>';
+                return;
+            }
+            host.innerHTML = analyticsCustomChartConfigs.map((cfg, idx) => `
+                <div class="analytics-card">
+                    <div class="analytics-card-header">
+                        <h3 style="margin:0;">Graphe #${idx + 1}</h3>
+                        <button type="button" class="btn-icon" data-remove-custom-chart="${cfg.id}">Supprimer</button>
+                    </div>
+                    <div class="analytics-card-subtitle">
+                        ${escapeHtml(getAnalyticsYLabel(cfg.yAxis))} par ${escapeHtml(getAnalyticsAxisLabel(cfg.xAxis))}
+                        ${cfg.groupBy ? ` | classe par ${escapeHtml(getAnalyticsAxisLabel(cfg.groupBy))}` : ''}
+                    </div>
+                    <div class="custom-chart-editor">
+                        <div class="map-control-group">
+                            <label>Axe X :</label>
+                            <select data-custom-chart-id="${cfg.id}" data-custom-field="xAxis">
+                                ${renderSelectOptions(ANALYTICS_X_OPTIONS, cfg.xAxis)}
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label>Axe Y :</label>
+                            <select data-custom-chart-id="${cfg.id}" data-custom-field="yAxis">
+                                ${renderSelectOptions(ANALYTICS_Y_OPTIONS, cfg.yAxis)}
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label>Classer par :</label>
+                            <select data-custom-chart-id="${cfg.id}" data-custom-field="groupBy">
+                                ${renderSelectOptions(ANALYTICS_GROUP_OPTIONS, cfg.groupBy)}
+                            </select>
+                        </div>
+                        <div class="map-control-group">
+                            <label>Type :</label>
+                            <select data-custom-chart-id="${cfg.id}" data-custom-field="chartType">
+                                ${renderSelectOptions(ANALYTICS_TYPE_OPTIONS, cfg.chartType)}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="analytics-chart-wrap">
+                        <canvas id="chart-${cfg.id}"></canvas>
+                    </div>
+                </div>
+            `).join('');
+
+            host.querySelectorAll('[data-remove-custom-chart]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const removeId = btn.dataset.removeCustomChart;
+                    analyticsCustomChartConfigs = analyticsCustomChartConfigs.filter(c => c.id !== removeId);
+                    if (analyticsCharts.custom.has(removeId)) {
+                        analyticsCharts.custom.get(removeId).destroy();
+                        analyticsCharts.custom.delete(removeId);
+                    }
+                    refreshAnalytics();
+                });
+            });
+
+            host.querySelectorAll('[data-custom-chart-id][data-custom-field]').forEach(select => {
+                select.addEventListener('change', () => {
+                    const chartId = select.dataset.customChartId;
+                    const field = select.dataset.customField;
+                    const config = analyticsCustomChartConfigs.find(c => c.id === chartId);
+                    if (!config || !field) return;
+                    config[field] = select.value;
+                    refreshAnalytics();
+                });
+            });
+        }
+
+        function computeBucketMetric(bucket, yAxis) {
+            if (!bucket) return 0;
+            if (yAxis === 'count') return bucket.count;
+            if (yAxis === 'individuals') return bucket.individuals;
+            if (yAxis === 'couples') return bucket.couples;
+            return bucket.speciesSet.size;
+        }
+
+        function buildCustomChartDatasets(dataset, config, topN) {
+            const xAxis = config.xAxis;
+            const groupBy = config.groupBy;
+            const yAxis = config.yAxis;
+            const maxItems = Math.max(4, topN);
+
+            if (!groupBy) {
+                const aggregates = new Map();
+                dataset.forEach(row => {
+                    const key = getAnalyticsXValue(row, xAxis);
+                    if (!aggregates.has(key)) {
+                        aggregates.set(key, { count: 0, individuals: 0, couples: 0, speciesSet: new Set() });
+                    }
+                    const bucket = aggregates.get(key);
+                    const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                    const type = getCountType(row).toLowerCase();
+                    const count = getEstimatedIndividuals(row);
+                    bucket.count += 1;
+                    if (type === 'individu' || type === 'ind') bucket.individuals += count;
+                    if (type === 'couple') bucket.couples += count;
+                    if (species) bucket.speciesSet.add(species);
+                });
+
+                let keys = sortAnalyticsKeys(Array.from(aggregates.keys()), xAxis).slice(0, maxItems);
+                return {
+                    labels: keys.map(k => formatAnalyticsXLabel(k, xAxis)),
+                    datasets: [{
+                        label: getAnalyticsYLabel(yAxis),
+                        data: keys.map(k => computeBucketMetric(aggregates.get(k), yAxis)),
+                        borderColor: 'rgba(31, 76, 122, 1)',
+                        backgroundColor: config.chartType === 'line' ? 'rgba(31, 76, 122, 0.12)' : 'rgba(31, 76, 122, 0.78)',
+                        borderWidth: 2,
+                        borderRadius: 4,
+                        tension: 0.23,
+                        fill: config.chartType === 'line'
+                    }]
+                };
+            }
+
+            const nested = new Map();
+            dataset.forEach(row => {
+                const xKey = getAnalyticsXValue(row, xAxis);
+                const groupKey = getAnalyticsXValue(row, groupBy) || 'NR';
+                if (!nested.has(xKey)) nested.set(xKey, new Map());
+                const groupMap = nested.get(xKey);
+                if (!groupMap.has(groupKey)) {
+                    groupMap.set(groupKey, { count: 0, individuals: 0, couples: 0, speciesSet: new Set() });
+                }
+                const bucket = groupMap.get(groupKey);
+                const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                const type = getCountType(row).toLowerCase();
+                const count = getEstimatedIndividuals(row);
+                bucket.count += 1;
+                if (type === 'individu' || type === 'ind') bucket.individuals += count;
+                if (type === 'couple') bucket.couples += count;
+                if (species) bucket.speciesSet.add(species);
+            });
+
+            const xKeys = sortAnalyticsKeys(Array.from(nested.keys()), xAxis).slice(0, maxItems);
+            const groupTotals = new Map();
+            xKeys.forEach(xKey => {
+                const mapByGroup = nested.get(xKey) || new Map();
+                mapByGroup.forEach((bucket, gKey) => {
+                    groupTotals.set(gKey, (groupTotals.get(gKey) || 0) + computeBucketMetric(bucket, yAxis));
+                });
+            });
+            const groupKeys = Array.from(groupTotals.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, Math.max(2, Math.min(8, topN)))
+                .map(([key]) => key);
+
+            const palette = [
+                'rgba(31, 76, 122, 0.78)',
+                'rgba(95, 145, 196, 0.76)',
+                'rgba(26, 95, 74, 0.76)',
+                'rgba(217, 123, 42, 0.76)',
+                'rgba(139, 102, 186, 0.76)',
+                'rgba(201, 86, 89, 0.76)',
+                'rgba(85, 140, 132, 0.76)',
+                'rgba(116, 126, 145, 0.76)'
+            ];
+            const datasets = groupKeys.map((groupKey, idx) => ({
+                label: groupKey,
+                data: xKeys.map(xKey => {
+                    const bucket = (nested.get(xKey) || new Map()).get(groupKey);
+                    return computeBucketMetric(bucket, yAxis);
+                }),
+                borderColor: palette[idx % palette.length].replace('0.76', '1'),
+                backgroundColor: config.chartType === 'line' ? palette[idx % palette.length].replace('0.76', '0.2') : palette[idx % palette.length],
+                borderWidth: 2,
+                borderRadius: 4,
+                tension: 0.22,
+                fill: config.chartType === 'line'
+            }));
+
+            return {
+                labels: xKeys.map(k => formatAnalyticsXLabel(k, xAxis)),
+                datasets
+            };
+        }
+
+        function getAnalyticsXValue(row, xAxis) {
+            if (xAxis === 'month') return getMonthFromJourDate(row['jourdateDebut']) || 'NR';
+            if (xAxis === 'year') return parseYearFromJourDate(row['jourdateDebut']) || 'NR';
+            if (xAxis === 'group') return getTaxonomicGroupForSinpRow(row) || 'Non renseigne';
+            if (xAxis === 'species') return (row['nomCite'] || row['nomvalide(R)'] || 'Non renseignee').trim();
+            if (xAxis === 'lifeStage') return decodeOccStadeToStadeAge(row['occStadeDeVie']) || 'Non renseigne';
+            if (xAxis === 'commune') return (row['nomCommune'] || 'Non renseignee').trim();
+            if (xAxis === 'project') return (row['Cadre_Acquisition'] || 'Non renseigne').trim();
+            return 'Autre';
+        }
+
+        function sortAnalyticsKeys(keys, xAxis) {
+            if (xAxis === 'month') {
+                const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'NR'];
+                return keys.sort((a, b) => months.indexOf(a) - months.indexOf(b));
+            }
+            if (xAxis === 'year') {
+                return keys.sort((a, b) => String(a).localeCompare(String(b)));
+            }
+            return keys.sort((a, b) => String(a).localeCompare(String(b), 'fr'));
+        }
+
+        function formatAnalyticsXLabel(raw, xAxis) {
+            if (xAxis !== 'month') return raw;
+            const map = { '01': 'Jan', '02': 'Fev', '03': 'Mar', '04': 'Avr', '05': 'Mai', '06': 'Jun', '07': 'Jul', '08': 'Aou', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec', 'NR': 'NR' };
+            return map[raw] || raw;
+        }
+
+        function renderGroupSpeciesDetails(groupMap) {
+            const btnContainer = document.getElementById('groupSpeciesButtons');
+            const namesEl = document.getElementById('groupSpeciesNames');
+            const titleEl = document.getElementById('groupSpeciesDetailTitle');
+            if (!btnContainer || !namesEl || !titleEl) return;
+
+            const entries = Array.from(groupMap.entries())
+                .map(([group, speciesSet]) => ({ group, species: Array.from(speciesSet).sort((a, b) => a.localeCompare(b, 'fr')), count: speciesSet.size }))
+                .sort((a, b) => b.count - a.count);
+
+            if (entries.length === 0) {
+                btnContainer.innerHTML = '';
+                titleEl.textContent = 'Aucun groupe';
+                namesEl.textContent = 'Aucune espece a afficher sur ce perimetre.';
+                analyticsSelectedGroupDetail = '';
+                return;
+            }
+
+            if (!analyticsSelectedGroupDetail || !entries.some(e => e.group === analyticsSelectedGroupDetail)) {
+                analyticsSelectedGroupDetail = entries[0].group;
+            }
+
+            btnContainer.innerHTML = entries.map(entry => (
+                `<button type="button" class="group-species-btn${entry.group === analyticsSelectedGroupDetail ? ' active' : ''}" data-group="${escapeHtml(entry.group)}">${escapeHtml(entry.group)} (${entry.count})</button>`
+            )).join('');
+
+            btnContainer.querySelectorAll('.group-species-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    analyticsSelectedGroupDetail = btn.dataset.group || '';
+                    refreshAnalytics();
+                });
+            });
+
+            const selected = entries.find(e => e.group === analyticsSelectedGroupDetail) || entries[0];
+            titleEl.textContent = `${selected.group} - ${selected.count} especes`;
+            namesEl.innerHTML = selected.species.length === 0
+                ? 'Aucune espece dans ce groupe.'
+                : selected.species.map(n => `- ${escapeHtml(n)}`).join('<br>');
+        }
+
+        function refreshAnalytics() {
+            const scopeSelect = document.getElementById('analyticsScope');
+            if (!scopeSelect || allData.length === 0) return;
+
+            const scope = scopeSelect.value;
+            const analyticsYear = document.getElementById('analyticsYear').value;
+            const zoneField = document.getElementById('analyticsZoneField').value;
+            const topN = Math.max(3, Number(document.getElementById('analyticsTopN').value) || 12);
+            const selectedGroup = document.getElementById('analyticsGroupFilter').value;
+            let scopeDataset = [];
+
+            if (scope === 'search') scopeDataset = extractSearchFilteredData();
+            if (scope === 'map') scopeDataset = extractMapFilteredData(false);
+            if (scope === 'map-zone') scopeDataset = extractMapFilteredData(true);
+
+            if (analyticsYear) {
+                scopeDataset = scopeDataset.filter(row => parseYearFromJourDate(row['jourdateDebut']) === analyticsYear);
+            }
+
+            const groupsInScope = new Set();
+            const speciesInScope = new Set();
+            scopeDataset.forEach(row => {
+                const g = getTaxonomicGroupForSinpRow(row);
+                const s = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                if (g) groupsInScope.add(g);
+                if (s) speciesInScope.add(s);
+            });
+
+            const groupSelect = document.getElementById('analyticsGroupFilter');
+            const speciesSelect = document.getElementById('analyticsSpeciesFilter');
+            if (groupSelect) {
+                const prev = groupSelect.value;
+                groupSelect.innerHTML = '<option value="">Tous</option>';
+                Array.from(groupsInScope).sort((a, b) => a.localeCompare(b, 'fr')).forEach(g => {
+                    const option = document.createElement('option');
+                    option.value = g;
+                    option.textContent = g;
+                    groupSelect.appendChild(option);
+                });
+                if (prev && Array.from(groupsInScope).includes(prev)) groupSelect.value = prev;
+            }
+
+            const speciesCandidates = scopeDataset
+                .filter(row => !selectedGroup || getTaxonomicGroupForSinpRow(row) === selectedGroup)
+                .map(row => (row['nomCite'] || row['nomvalide(R)'] || '').trim())
+                .filter(Boolean);
+            if (speciesSelect) {
+                const prevSp = speciesSelect.value;
+                speciesSelect.innerHTML = '<option value="">Toutes</option>';
+                Array.from(new Set(speciesCandidates)).sort((a, b) => a.localeCompare(b, 'fr')).forEach(sp => {
+                    const option = document.createElement('option');
+                    option.value = sp;
+                    option.textContent = sp;
+                    speciesSelect.appendChild(option);
+                });
+                if (prevSp && speciesCandidates.includes(prevSp)) speciesSelect.value = prevSp;
+            }
+
+            let dataset = [...scopeDataset];
+            const appliedGroup = document.getElementById('analyticsGroupFilter').value;
+            const appliedSpecies = document.getElementById('analyticsSpeciesFilter').value;
+            if (appliedGroup) dataset = dataset.filter(row => getTaxonomicGroupForSinpRow(row) === appliedGroup);
+            if (appliedSpecies) dataset = dataset.filter(row => (row['nomCite'] || row['nomvalide(R)'] || '').trim() === appliedSpecies);
+
+            const speciesSet = new Set();
+            let estimatedIndividuals = 0;
+            let couplesCount = 0;
+            dataset.forEach(row => {
+                const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                if (species) speciesSet.add(species);
+                const type = getCountType(row).toLowerCase();
+                const count = getEstimatedIndividuals(row);
+                if (type === 'couple') couplesCount += count;
+                if (type === 'individu' || type === 'ind') estimatedIndividuals += count;
+            });
+
+            document.getElementById('kpiObservations').textContent = dataset.length.toLocaleString('fr-FR');
+            document.getElementById('kpiSpecies').textContent = speciesSet.size.toLocaleString('fr-FR');
+            document.getElementById('kpiIndividuals').textContent = estimatedIndividuals.toLocaleString('fr-FR');
+            document.getElementById('kpiCouples').textContent = couplesCount.toLocaleString('fr-FR');
+
+            const scopeLabel = scope === 'search'
+                ? 'filtres de recherche'
+                : (scope === 'map' ? 'filtres de carte (hors zone)' : 'filtres carte + zone dessinée');
+            document.getElementById('analyticsScopeInfo').textContent = `Perimetre: ${scopeLabel}${analyticsYear ? ` | annee ${analyticsYear}` : ''}${appliedGroup ? ` | groupe ${appliedGroup}` : ''}${appliedSpecies ? ` | espece ${appliedSpecies}` : ''}.`;
+
+            const groupSpeciesMap = new Map();
+            scopeDataset.forEach(row => {
+                const group = getTaxonomicGroupForSinpRow(row) || 'Non renseigne';
+                const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                if (!species) return;
+                if (!groupSpeciesMap.has(group)) groupSpeciesMap.set(group, new Set());
+                groupSpeciesMap.get(group).add(species);
+            });
+            renderGroupSpeciesDetails(groupSpeciesMap);
+
+            const zoneSpeciesMap = new Map();
+            dataset.forEach(row => {
+                const zone = String(row[zoneField] || 'Non renseignée').trim() || 'Non renseignée';
+                const species = String(row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                if (!species) return;
+                if (!zoneSpeciesMap.has(zone)) zoneSpeciesMap.set(zone, new Set());
+                zoneSpeciesMap.get(zone).add(species);
+            });
+            const zoneData = Array.from(zoneSpeciesMap.entries())
+                .map(([zone, set]) => ({ zone, count: set.size }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, topN);
+
+            const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+            const monthLabels = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthIndividuals = Object.fromEntries(months.map(m => [m, 0]));
+            const monthCouples = Object.fromEntries(months.map(m => [m, 0]));
+            const monthCounts = Object.fromEntries(months.map(m => [m, 0]));
+
+            dataset.forEach(row => {
+                const month = getMonthFromJourDate(row['jourdateDebut']);
+                if (!month) return;
+                const type = getCountType(row).toLowerCase();
+                const count = getEstimatedIndividuals(row);
+                if (type === 'couple') monthCouples[month] += count;
+                if (type === 'individu' || type === 'ind') monthIndividuals[month] += count;
+                monthCounts[month] += 1;
+            });
+
+            const phenologyIndividuals = months.map(m => monthIndividuals[m]);
+            const phenologyCouples = months.map(m => monthCouples[m]);
+            const phenologyCounts = months.map(m => monthCounts[m]);
+            const peakIndividualsIdx = phenologyIndividuals.reduce((bestIdx, val, idx, arr) => val > arr[bestIdx] ? idx : bestIdx, 0);
+            const peakCouplesIdx = phenologyCouples.reduce((bestIdx, val, idx, arr) => val > arr[bestIdx] ? idx : bestIdx, 0);
+            document.getElementById('analyticsInsights').textContent = dataset.length === 0
+                ? 'Aucune donnée sur ce périmètre. Ajustez les filtres ou la zone dessinée.'
+                : `Pic individus: ${monthLabels[peakIndividualsIdx]} (${phenologyIndividuals[peakIndividualsIdx].toLocaleString('fr-FR')}). ` +
+                  `Pic couples: ${monthLabels[peakCouplesIdx]} (${phenologyCouples[peakCouplesIdx].toLocaleString('fr-FR')}).`;
+
+            destroyAnalyticsCharts();
+            const zoneCanvas = document.getElementById('chartSpeciesByZone');
+            const phenologyCanvas = document.getElementById('chartPhenology');
+            if (!zoneCanvas || !phenologyCanvas || typeof Chart === 'undefined') return;
+
+            analyticsCharts.speciesByZone = new Chart(zoneCanvas, {
+                type: 'bar',
+                data: {
+                    labels: zoneData.map(z => z.zone.length > 26 ? `${z.zone.slice(0, 26)}...` : z.zone),
+                    datasets: [{
+                        label: 'Espèces uniques',
+                        data: zoneData.map(z => z.count),
+                        backgroundColor: 'rgba(31, 76, 122, 0.7)',
+                        borderColor: 'rgba(31, 76, 122, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#3f5268', maxRotation: 30, minRotation: 0 } },
+                        y: { beginAtZero: true, ticks: { color: '#3f5268' } }
+                    }
+                }
+            });
+
+            analyticsCharts.phenology = new Chart(phenologyCanvas, {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: appliedSpecies
+                        ? [
+                            {
+                                label: 'Nb donnees',
+                                data: phenologyCounts,
+                                borderColor: 'rgba(31, 76, 122, 1)',
+                                backgroundColor: 'rgba(31, 76, 122, 0.08)',
+                                borderWidth: 2,
+                                tension: 0.25,
+                                fill: true
+                            },
+                            {
+                                label: 'Nb individus estimes',
+                                data: phenologyIndividuals,
+                                borderColor: 'rgba(95, 145, 196, 1)',
+                                backgroundColor: 'rgba(95, 145, 196, 0.08)',
+                                borderWidth: 2,
+                                tension: 0.25,
+                                fill: true
+                            }
+                        ]
+                        : [
+                            {
+                                label: 'Individus',
+                                data: phenologyIndividuals,
+                                borderColor: 'rgba(31, 76, 122, 1)',
+                                backgroundColor: 'rgba(31, 76, 122, 0.12)',
+                                borderWidth: 2,
+                                tension: 0.25,
+                                fill: true
+                            },
+                            {
+                                label: 'Couples',
+                                data: phenologyCouples,
+                                borderColor: 'rgba(95, 145, 196, 1)',
+                                backgroundColor: 'rgba(95, 145, 196, 0.08)',
+                                borderWidth: 2,
+                                tension: 0.25,
+                                fill: true
+                            }
+                        ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#3f5268' } },
+                        x: { ticks: { color: '#3f5268' } }
+                    }
+                }
+            });
+
+            if (analyticsCustomChartConfigs.length === 0) {
+                analyticsCustomChartCounter += 1;
+                analyticsCustomChartConfigs.push({
+                    id: `custom-${analyticsCustomChartCounter}`,
+                    xAxis: 'month',
+                    yAxis: 'count',
+                    chartType: 'bar',
+                    groupBy: ''
+                });
+            }
+
+            renderCustomChartsCards();
+            analyticsCustomChartConfigs.forEach(cfg => {
+                const canvas = document.getElementById(`chart-${cfg.id}`);
+                if (!canvas) return;
+                const chartData = buildCustomChartDatasets(dataset, cfg, topN);
+                const chart = new Chart(canvas, {
+                    type: cfg.chartType,
+                    data: {
+                        labels: chartData.labels.map(truncateLabel),
+                        datasets: chartData.datasets
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: true, position: 'top', labels: { boxWidth: 12 } },
+                            tooltip: { callbacks: { title: (items) => items?.[0]?.label || '' } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#3f5268', precision: 0 }, grid: { color: 'rgba(63,82,104,0.12)' } },
+                            x: { ticks: { color: '#3f5268', maxRotation: 35, minRotation: 0 }, grid: { display: false } }
+                        }
+                    }
+                });
+                analyticsCharts.custom.set(cfg.id, chart);
             });
         }
 
