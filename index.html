@@ -56,7 +56,7 @@
             --font-ui: 'DM Sans', system-ui, sans-serif;
             --font-sci: 'Source Serif 4', Georgia, serif;
             --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-            --header-h: 42px;
+            --header-h: 36px;
             --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
             --focus-ring: 0 0 0 3px rgba(42, 86, 128, 0.22);
         }
@@ -122,19 +122,74 @@
         }
 
         .loading-logo {
-            width: 96px;
-            height: 96px;
+            width: min(220px, 58vw);
+            height: min(168px, 44vw);
+            aspect-ratio: auto;
+            box-sizing: border-box;
             background: white;
             border-radius: 20px;
-            padding: 14px;
-            margin: 0 auto 28px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.1);
+            padding: 14px 22px;
+            margin: 0 auto 32px;
+            box-shadow:
+                0 18px 52px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.14);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: loadingLogoFloat 3.2s ease-in-out infinite;
+        }
+
+        .loading-logo::before {
+            content: '';
+            position: absolute;
+            inset: -12px -16px;
+            border-radius: 28px;
+            background: radial-gradient(ellipse at center, rgba(126, 184, 168, 0.45), transparent 68%);
+            opacity: 0.55;
+            z-index: -1;
+            animation: loadingLogoGlow 2.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .loading-logo::after {
+            content: '';
+            position: absolute;
+            inset: -3px -5px;
+            border-radius: 24px;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            opacity: 0;
+            animation: loadingLogoRing 2.6s ease-out infinite;
+            pointer-events: none;
         }
 
         .loading-logo img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            display: block;
+            animation: loadingLogoPulse 3.2s ease-in-out infinite;
+        }
+
+        @keyframes loadingLogoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes loadingLogoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.035); }
+        }
+
+        @keyframes loadingLogoGlow {
+            0%, 100% { opacity: 0.35; transform: scale(0.96); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        @keyframes loadingLogoRing {
+            0% { opacity: 0.55; transform: scale(0.96); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; transform: scale(1.12); }
         }
 
         .loading-title {
@@ -392,7 +447,7 @@
         /* Header */
         header.app-header {
             background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 48%, #245a86 100%);
-            padding: 0.28rem clamp(0.6rem, 1.5vw, 1rem);
+            padding: 0.22rem clamp(0.5rem, 1.2vw, 0.85rem);
             box-shadow: 0 2px 12px rgba(10, 28, 46, 0.16);
             position: relative;
             z-index: 100;
@@ -423,17 +478,163 @@
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 0.65rem;
+            gap: 0.5rem;
             position: relative;
             z-index: 1;
         }
 
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-shrink: 0;
+            padding-left: 0.5rem;
+        }
+
+        .header-partner-links {
+            display: flex;
+            align-items: stretch;
+            gap: 0.35rem;
+            padding: 0.16rem 0.3rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        .header-partner-link {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.1rem;
+            min-width: 44px;
+            padding: 0.16rem 0.28rem 0.14rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 1px 3px rgba(8, 24, 40, 0.18);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+            text-decoration: none;
+            color: var(--primary-dark);
+            overflow: hidden;
+        }
+
+        .header-partner-link:hover {
+            transform: translateY(-2px);
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 4px 12px rgba(8, 24, 40, 0.22);
+        }
+
+        .header-partner-link:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        .header-partner-link img {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .header-partner-link .partner-label {
+            font-size: 0.52rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            color: #1a3a5c;
+            text-transform: uppercase;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-partner-link .partner-fallback {
+            display: none;
+            font-size: 0.52rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: 0.02em;
+            line-height: 1;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .header-partner-link.is-fallback img { display: none; }
+        .header-partner-link.is-fallback .partner-fallback { display: block; }
+        .header-partner-link.is-fallback .partner-label { display: none; }
+
+        .header-actions-sep {
+            width: 1px;
+            align-self: stretch;
+            min-height: 26px;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.45) 20%,
+                rgba(255, 255, 255, 0.45) 80%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            flex-shrink: 0;
+        }
+
+        .header-reset-btn {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.1rem;
+            min-width: 44px;
+            height: auto;
+            padding: 0.16rem 0.32rem 0.14rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        .header-reset-btn:hover {
+            background: rgba(255, 255, 255, 0.24);
+            border-color: rgba(255, 255, 255, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(8, 24, 40, 0.2);
+        }
+
+        .header-reset-btn:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        .header-reset-btn svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+
+        .header-reset-btn .reset-label {
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            line-height: 1;
+            opacity: 0.92;
+        }
+
         .logo {
-            height: 30px;
+            height: 26px;
             width: auto;
             background: white;
-            padding: 2px 6px;
-            border-radius: 7px;
+            padding: 1px 5px;
+            border-radius: 6px;
             box-shadow: 0 1px 6px rgba(0,0,0,0.16);
             flex-shrink: 0;
             display: block;
@@ -443,30 +644,30 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            line-height: 1.15;
+            line-height: 1.1;
         }
 
         .header-text h1 {
             color: white;
-            font-size: 0.92rem;
+            font-size: 0.84rem;
             font-weight: 700;
             letter-spacing: -0.02em;
-            line-height: 1.15;
+            line-height: 1.1;
             margin: 0;
         }
 
         .header-text p {
             color: rgba(255,255,255,0.75);
-            font-size: 0.65rem;
-            margin: 0.08rem 0 0;
-            line-height: 1.2;
+            font-size: 0.58rem;
+            margin: 0.04rem 0 0;
+            line-height: 1.15;
         }
 
         main {
             width: 100%;
             max-width: none;
             margin: 0;
-            padding: 0.35rem clamp(0.4rem, 1vw, 0.75rem) 0.4rem;
+            padding: 0.25rem clamp(0.35rem, 1vw, 0.65rem) 0.3rem;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -481,11 +682,160 @@
             padding: 0.4rem 0.6rem;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border-light);
-            margin-bottom: 0.3rem;
+            margin-bottom: 0;
             flex-shrink: 0;
             overflow: visible;
             position: relative;
             z-index: 50;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .filters-panel-body {
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+            max-height: min(38vh, 340px);
+            padding-right: 0.1rem;
+        }
+
+        /* Laisse les suggestions dépasser le panneau (sinon overflow les coupe) */
+        .filters-panel-body:has(.autocomplete-dropdown.active) {
+            overflow: visible;
+        }
+
+        #sharedFiltersRoot:has(.autocomplete-dropdown.active) {
+            z-index: 220;
+        }
+
+        .search-section:has(.autocomplete-dropdown.active) {
+            z-index: 220;
+        }
+
+        .filters-resize-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            flex-shrink: 0;
+            height: 22px;
+            margin: 0.15rem 0 0.3rem;
+            border-radius: 6px;
+            background: linear-gradient(180deg, rgba(26, 58, 92, 0.04) 0%, rgba(26, 58, 92, 0.08) 100%);
+            border: 1px solid var(--border-light);
+            cursor: row-resize;
+            user-select: none;
+            position: relative;
+            z-index: 40;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .filters-resize-bar:hover,
+        .filters-resize-bar.is-dragging {
+            background: linear-gradient(180deg, rgba(26, 58, 92, 0.08) 0%, rgba(45, 90, 135, 0.14) 100%);
+            border-color: var(--primary-light);
+        }
+
+        .filters-resize-grip {
+            width: 42px;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(26, 58, 92, 0.28);
+            pointer-events: none;
+        }
+
+        .filters-resize-bar:hover .filters-resize-grip,
+        .filters-resize-bar.is-dragging .filters-resize-grip {
+            background: var(--primary);
+        }
+
+        .btn-toggle-filters {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--primary);
+            border-radius: 999px;
+            padding: 0.12rem 0.55rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+            line-height: 1.2;
+        }
+
+        .btn-toggle-filters:hover {
+            background: var(--bg-elevated);
+            border-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-toggle-filters svg {
+            width: 12px;
+            height: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        #sharedFiltersRoot {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            z-index: 60;
+            position: relative;
+        }
+
+        #sharedFiltersRoot.filters-collapsed .btn-toggle-filters svg {
+            transform: rotate(180deg);
+        }
+
+        #sharedFiltersRoot.filters-collapsed .search-section {
+            padding: 0.3rem 0.55rem;
+        }
+
+        #sharedFiltersRoot.filters-collapsed .filters-panel-body,
+        #sharedFiltersRoot.filters-collapsed .btn-add-filter,
+        #sharedFiltersRoot.filters-collapsed .quick-year-filters {
+            display: none !important;
+        }
+
+        #sharedFiltersRoot.filters-collapsed .filters-resize-bar {
+            cursor: pointer;
+            margin-top: 0.1rem;
+        }
+
+        #sharedFiltersRoot.filters-collapsed .filters-resize-grip {
+            display: none;
+        }
+
+        #tab-search.filters-collapsed .btn-toggle-filters svg {
+            transform: rotate(180deg);
+        }
+
+        #tab-search.filters-collapsed .search-section {
+            padding: 0.3rem 0.55rem;
+        }
+
+        #tab-search.filters-collapsed .filters-panel-body,
+        #tab-search.filters-collapsed .btn-add-filter,
+        #tab-search.filters-collapsed .quick-year-filters {
+            display: none !important;
+        }
+
+        #tab-search.filters-collapsed .filters-resize-bar {
+            cursor: pointer;
+            margin-top: 0.1rem;
+        }
+
+        #tab-search.filters-collapsed .filters-resize-grip {
+            display: none;
+        }
+
+        .filters-toolbar .btn-toggle-filters {
+            margin-left: auto;
         }
 
         .search-section h2 {
@@ -565,9 +915,9 @@
             border: 1px solid var(--primary-light);
             border-top: none;
             border-radius: 0 0 6px 6px;
-            max-height: 220px;
+            max-height: 280px;
             overflow-y: auto;
-            z-index: 400;
+            z-index: 500;
             box-shadow: 0 8px 24px rgba(26, 95, 74, 0.15);
         }
 
@@ -636,6 +986,45 @@
             color: inherit;
             padding: 0 2px;
             border-radius: 2px;
+        }
+
+        .autocomplete-year-sep {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.28rem 0.55rem;
+            background: #b8c6d6;
+            border-top: 1px solid #7d93a8;
+            border-bottom: 1px solid #7d93a8;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .autocomplete-year-sep::before,
+        .autocomplete-year-sep::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: #3d556c;
+            border-radius: 1px;
+            opacity: 0.85;
+        }
+
+        .autocomplete-year-sep-label {
+            flex-shrink: 0;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #0a1c2e;
+            background: #e8eef5;
+            padding: 0.12rem 0.5rem;
+            border-radius: 3px;
+            border: 1px solid #5a738a;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.6);
         }
 
         .autocomplete-info {
@@ -1483,11 +1872,11 @@
         /* Tabs Navigation */
         .tabs-nav {
             display: flex;
-            gap: 0.15rem;
-            margin-bottom: 0.3rem;
+            gap: 0.12rem;
+            margin-bottom: 0.22rem;
             background: var(--bg-card);
             border-radius: var(--radius-sm);
-            padding: 0.15rem;
+            padding: 0.1rem;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border-light);
             position: relative;
@@ -1497,21 +1886,21 @@
 
         .tab-btn {
             flex: 1;
-            padding: 0.35rem 0.55rem;
+            padding: 0.22rem 0.45rem;
             border: none;
             background: transparent;
             color: var(--text-secondary);
-            font-size: 0.76rem;
+            font-size: 0.72rem;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 5px;
             transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.35rem;
-            min-height: 34px;
+            gap: 0.28rem;
+            min-height: 28px;
         }
 
         .tab-btn:hover {
@@ -1522,12 +1911,12 @@
         .tab-btn.active {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
-            box-shadow: 0 4px 14px rgba(22, 53, 82, 0.28);
+            box-shadow: 0 3px 10px rgba(22, 53, 82, 0.22);
         }
 
         .tab-btn svg {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             flex-shrink: 0;
         }
 
@@ -1638,10 +2027,17 @@
 
         .tab-content .search-section {
             flex-shrink: 0;
-            max-height: none;
             overflow: visible;
             position: relative;
             z-index: 50;
+        }
+
+        .tab-content .filters-resize-bar {
+            flex-shrink: 0;
+        }
+
+        .tab-content .view-mode-bar {
+            flex-shrink: 0;
         }
 
         /* Map Section */
@@ -2475,7 +2871,7 @@
         }
 
         .species-name-list.is-open {
-            max-height: 160px;
+            max-height: 320px;
             overflow: auto;
             opacity: 1;
             border-top: 1px dashed var(--border-light);
@@ -2627,9 +3023,9 @@
         }
 
         .analytics-card--tall .analytics-chart-wrap {
-            height: 360px;
-            min-height: 360px;
-            max-height: 360px;
+            height: 380px;
+            min-height: 380px;
+            max-height: 380px;
         }
 
         /* Ne PAS forcer width/height 100% sur le canvas : Chart.js gère les pixels */
@@ -2718,16 +3114,21 @@
 
         @media (max-width: 640px) {
             html { font-size: 13px; }
-            .logo { height: 32px; }
-            header.app-header { padding: 0.45rem 0.65rem; }
-            main { padding: 0.45rem 0.5rem 0.7rem; }
+            .logo { height: 24px; }
+            header.app-header { padding: 0.2rem 0.55rem; }
+            .header-partner-links { gap: 0.28rem; padding: 0.12rem 0.22rem; }
+            .header-partner-link { min-width: 40px; }
+            .header-partner-link img { width: 15px; height: 15px; }
+            .header-reset-btn { min-width: 40px; }
+            .header-actions { gap: 0.45rem; }
+            main { padding: 0.3rem 0.45rem 0.5rem; }
             .tab-btn {
-                padding: 0.35rem 0.3rem;
-                font-size: 0.7rem;
-                gap: 0.25rem;
-                min-height: 34px;
+                padding: 0.2rem 0.28rem;
+                font-size: 0.68rem;
+                gap: 0.2rem;
+                min-height: 26px;
             }
-            .tab-btn svg { width: 15px; height: 15px; }
+            .tab-btn svg { width: 13px; height: 13px; }
             .quick-filters { width: 100%; }
             .pagination { width: 100%; justify-content: space-between; flex-wrap: wrap; }
             .selection-toolbar { width: 100%; }
@@ -2783,6 +3184,16 @@
             .logo { height: 26px; }
             .header-text h1 { font-size: 0.82rem; }
             .header-text p { display: none; }
+            .header-actions { gap: 0.4rem; padding-left: 0.35rem; }
+            .header-partner-links { gap: 0.28rem; padding: 0.16rem 0.22rem; border-radius: 8px; }
+            .header-partner-link { min-width: 38px; padding: 0.2rem 0.22rem 0.16rem; gap: 0.1rem; }
+            .header-partner-link img { width: 15px; height: 15px; }
+            .header-partner-link .partner-label,
+            .header-partner-link .partner-fallback,
+            .header-reset-btn .reset-label { font-size: 0.48rem; }
+            .header-reset-btn { min-width: 38px; padding: 0.2rem 0.22rem 0.16rem; }
+            .header-reset-btn svg { width: 14px; height: 14px; }
+            .header-actions-sep { min-height: 28px; }
             .tab-btn { min-height: 30px; padding: 0.25rem 0.4rem; }
         }
 
@@ -2864,6 +3275,43 @@
                 <h1>Base de données interne</h1>
                 <p>Conservatoire d'Espaces Naturels de Corse</p>
             </div>
+            <div class="header-actions">
+                <nav class="header-partner-links" aria-label="Ressources externes">
+                    <a class="header-partner-link" href="https://www.iucnredlist.org/" target="_blank" rel="noopener noreferrer" title="IUCN Red List">
+                        <img src="https://www.google.com/s2/favicons?domain=iucnredlist.org&sz=64" alt="" loading="lazy" onerror="this.parentElement.classList.add('is-fallback')">
+                        <span class="partner-label">IUCN</span>
+                        <span class="partner-fallback">IUCN</span>
+                    </a>
+                    <a class="header-partner-link" href="https://www.fosfarbase.org/" target="_blank" rel="noopener noreferrer" title="fosFARbase">
+                        <img src="https://www.google.com/s2/favicons?domain=fosfarbase.org&sz=64" alt="" loading="lazy" onerror="this.parentElement.classList.add('is-fallback')">
+                        <span class="partner-label">FAR</span>
+                        <span class="partner-fallback">FAR</span>
+                    </a>
+                    <a class="header-partner-link" href="https://www.geoportail.gouv.fr/" target="_blank" rel="noopener noreferrer" title="Géoportail">
+                        <img src="https://www.google.com/s2/favicons?domain=geoportail.gouv.fr&sz=64" alt="" loading="lazy" onerror="this.parentElement.classList.add('is-fallback')">
+                        <span class="partner-label">Géo</span>
+                        <span class="partner-fallback">Géo</span>
+                    </a>
+                    <a class="header-partner-link" href="https://www.gbif.org/" target="_blank" rel="noopener noreferrer" title="GBIF">
+                        <img src="https://www.google.com/s2/favicons?domain=gbif.org&sz=64" alt="" loading="lazy" onerror="this.parentElement.classList.add('is-fallback')">
+                        <span class="partner-label">GBIF</span>
+                        <span class="partner-fallback">GBIF</span>
+                    </a>
+                    <a class="header-partner-link" href="https://mol.org/" target="_blank" rel="noopener noreferrer" title="Map of Life">
+                        <img src="https://www.google.com/s2/favicons?domain=mol.org&sz=64" alt="" loading="lazy" onerror="this.parentElement.classList.add('is-fallback')">
+                        <span class="partner-label">MoL</span>
+                        <span class="partner-fallback">MoL</span>
+                    </a>
+                </nav>
+                <span class="header-actions-sep" aria-hidden="true"></span>
+                <button type="button" class="header-reset-btn" id="headerResetAllBtn" title="Réinitialiser toutes les recherches" aria-label="Réinitialiser toutes les recherches">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                        <polyline points="3 4 3 10 9 10"></polyline>
+                    </svg>
+                    <span class="reset-label">Reset</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -2896,13 +3344,13 @@
             </button>
         </div>
 
-        <!-- TAB 1: SEARCH -->
-        <div class="tab-content active" id="tab-search">
-        <section class="search-section">
+        <!-- Filtres partagés (identiques sur les 3 onglets) -->
+        <div id="sharedFiltersRoot">
+        <section class="search-section" id="searchSection">
             <div class="filters-toolbar">
                 <span class="filters-toolbar-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                    Filtres de recherche
+                    Filtres
                 </span>
                 <div class="quick-filters" id="quickFilters">
                     <span class="quick-filter-label">Envoyé national :</span>
@@ -2910,12 +3358,19 @@
                     <button type="button" class="quick-filter-btn" data-quick-national="true">Oui</button>
                     <button type="button" class="quick-filter-btn" data-quick-national="false">Non</button>
                 </div>
+                <button type="button" class="btn-toggle-filters" id="toggleFiltersPanelBtn" aria-expanded="true" aria-controls="filtersPanelBody" title="Réduire / agrandir la zone de contenu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    <span class="toggle-filters-label">Agrandir le contenu</span>
+                </button>
             </div>
             <div class="quick-year-filters" id="quickYearFilters" hidden>
                 <span class="quick-filter-label">Année :</span>
                 <div class="quick-year-btns" id="quickYearButtons"></div>
             </div>
             <div class="active-filters-bar" id="activeFiltersBar"></div>
+            <div class="filters-panel-body" id="filtersPanelBody">
             <div class="filters-container" id="filtersContainer">
                 <!-- Premier filtre (toujours visible) -->
                 <div class="filter-row" data-filter-id="0">
@@ -2972,8 +3427,22 @@
                 </div>
             </div>
             <button type="button" class="btn-add-filter" id="addFilterBtn">+ Ajouter un filtre</button>
+            </div><!-- End filtersPanelBody -->
         </section>
 
+        <div class="filters-resize-bar" id="filtersResizeBar" title="Glisser pour redimensionner · double-clic pour plier / déplier" role="separator" aria-orientation="horizontal" aria-label="Redimensionner la zone filtres">
+            <button type="button" class="btn-toggle-filters" id="toggleFiltersPanelBtnBar" aria-expanded="true" aria-controls="filtersPanelBody" title="Réduire / agrandir la zone de contenu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                <span class="toggle-filters-label">Agrandir le contenu</span>
+            </button>
+            <div class="filters-resize-grip" aria-hidden="true"></div>
+        </div>
+        </div><!-- End sharedFiltersRoot -->
+
+        <!-- TAB 1: SEARCH -->
+        <div class="tab-content active" id="tab-search">
         <div class="view-mode-bar">
             <div class="view-mode-nav" role="tablist" aria-label="Mode d'affichage du tableau">
                 <button type="button" class="view-mode-btn active" data-table-view="readable" id="viewModeReadable">Vue lisible</button>
@@ -3048,41 +3517,9 @@
                             </select>
                         </div>
                         <div class="map-control-group">
-                            <label>Projet :</label>
-                            <select id="mapProjectFilter">
-                                <option value="">Tous</option>
-                            </select>
-                        </div>
-                        <div class="map-control-group">
-                            <label>Année :</label>
-                            <select id="mapYearFilter">
-                                <option value="">Toutes</option>
-                            </select>
-                        </div>
-                        <div class="map-control-group observer-filter">
-                            <label>Observateur :</label>
-                            <div class="map-autocomplete-wrapper">
-                                <input type="text" id="mapObserverFilter" placeholder="Rechercher..." autocomplete="off">
-                                <div class="map-autocomplete-dropdown" id="observerDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="map-control-group">
-                            <label>Groupe :</label>
-                            <select id="mapGroupFilter">
-                                <option value="">Tous</option>
-                            </select>
-                        </div>
-                        <div class="map-control-group">
-                            <label>Espèce :</label>
-                            <select id="mapSpeciesFilter">
-                                <option value="">Toutes</option>
-                            </select>
-                        </div>
-                        <div class="map-control-group">
                             <label>Zone carte :</label>
                             <button type="button" class="btn btn-secondary" id="clearMapDrawZone" style="padding: 0.3rem 0.55rem; font-size: 0.7rem;" title="Supprimer le polygone ou rectangle dessiné">Effacer la zone</button>
                         </div>
-                        <button class="btn btn-reset" id="resetMapFilters" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">Réinitialiser</button>
                     </div>
                 </div>
                 <div id="map"></div>
@@ -3102,9 +3539,8 @@
                         <div class="map-control-group">
                             <label for="analyticsScope">Périmètre :</label>
                             <select id="analyticsScope">
-                                <option value="search">Filtres recherche</option>
-                                <option value="map" selected>Filtres carte</option>
-                                <option value="map-zone">Carte + zone dessinée</option>
+                                <option value="search" selected>Filtres communs</option>
+                                <option value="map-zone">Filtres + zone dessinée</option>
                             </select>
                         </div>
                         <div class="map-control-group">
@@ -3142,6 +3578,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="group-species-detail" id="groupSpeciesDetailPanel">
+                    <div class="group-species-header">
+                        <strong style="font-size:0.78rem;">Espèces par groupe (cliquer un groupe ou une part du donut)</strong>
+                        <span id="groupSpeciesDetailTitle" style="font-size:0.72rem;color:var(--text-muted);">Aucun groupe sélectionné</span>
+                    </div>
+                    <div class="group-species-buttons" id="groupSpeciesButtons"></div>
+                    <div class="species-name-list" id="groupSpeciesNames" aria-live="polite"></div>
+                </div>
                 <div class="analytics-kpis">
                     <div class="analytics-kpi kpi-obs">
                         <div class="kpi-body"><div class="kpi-label">Observations</div><div class="kpi-value" id="kpiObservations">-</div></div>
@@ -3150,21 +3594,13 @@
                         <div class="kpi-body"><div class="kpi-label">Richesse spécifique</div><div class="kpi-value" id="kpiSpecies">-</div></div>
                     </div>
                     <div class="analytics-kpi kpi-indiv">
-                        <div class="kpi-body"><div class="kpi-label">Individus estimés</div><div class="kpi-value" id="kpiIndividuals">-</div></div>
+                        <div class="kpi-body"><div class="kpi-label">Individus (dénombrés)</div><div class="kpi-value" id="kpiIndividuals">-</div></div>
                     </div>
                     <div class="analytics-kpi kpi-couples">
-                        <div class="kpi-body"><div class="kpi-label">Couples observés</div><div class="kpi-value" id="kpiCouples">-</div></div>
+                        <div class="kpi-body"><div class="kpi-label">Couples (dénombrés)</div><div class="kpi-value" id="kpiCouples">-</div></div>
                     </div>
                 </div>
                 <div class="analytics-insights" id="analyticsInsights">Chargement des indicateurs…</div>
-                <div class="group-species-detail">
-                    <div class="group-species-header">
-                        <strong style="font-size:0.78rem;">Espèces par groupe (cliquer pour le détail)</strong>
-                        <span id="groupSpeciesDetailTitle" style="font-size:0.72rem;color:var(--text-muted);">Aucun groupe sélectionné</span>
-                    </div>
-                    <div class="group-species-buttons" id="groupSpeciesButtons"></div>
-                    <div class="species-name-list" id="groupSpeciesNames" aria-live="polite"></div>
-                </div>
                 <div class="analytics-subtabs">
                     <button type="button" class="analytics-subtab-btn active" data-analytics-subtab="fixed">Figures</button>
                     <button type="button" class="analytics-subtab-btn" data-analytics-subtab="custom">Personnalisées</button>
@@ -3175,7 +3611,7 @@
                             <div class="analytics-card-head">
                                 <span class="analytics-card-fig">Fig. 1</span>
                                 <h3>Phénologie annuelle</h3>
-                                <div class="analytics-card-subtitle">Effectifs mensuels (individus estimés et couples) sur le périmètre sélectionné</div>
+                                <div class="analytics-card-subtitle">Observations (barres, axe gauche) et effectifs dénombrés — individus / couples (courbes, axe droit). Effectif = milieu de min–max.</div>
                             </div>
                             <div class="analytics-chart-wrap">
                                 <canvas id="chartPhenology"></canvas>
@@ -3185,7 +3621,7 @@
                             <div class="analytics-card-head">
                                 <span class="analytics-card-fig">Fig. 2</span>
                                 <h3>Richesse spécifique par zone</h3>
-                                <div class="analytics-card-subtitle">Nombre d’espèces uniques (Top N) — axe horizontal pour lisibilité des libellés</div>
+                                <div class="analytics-card-subtitle">Nombre de taxons distincts (S) par commune ou projet — Top N du bandeau</div>
                             </div>
                             <div class="analytics-chart-wrap">
                                 <canvas id="chartSpeciesByZone"></canvas>
@@ -3195,7 +3631,7 @@
                             <div class="analytics-card-head">
                                 <span class="analytics-card-fig">Fig. 3</span>
                                 <h3>Composition taxonomique</h3>
-                                <div class="analytics-card-subtitle">Répartition des observations par groupe (palette adaptée daltonisme)</div>
+                                <div class="analytics-card-subtitle">Part des observations par groupe (palette Okabe–Ito). Clic = liste des espèces.</div>
                             </div>
                             <div class="analytics-chart-wrap">
                                 <canvas id="chartByGroup"></canvas>
@@ -3205,7 +3641,7 @@
                             <div class="analytics-card-head">
                                 <span class="analytics-card-fig">Fig. 4</span>
                                 <h3>Effort d’observation interannuel</h3>
-                                <div class="analytics-card-subtitle">Nombre de données et richesse spécifique par année civile</div>
+                                <div class="analytics-card-subtitle">Volume d’observations (n, barres) et richesse spécifique (S, courbe) par année civile</div>
                             </div>
                             <div class="analytics-chart-wrap">
                                 <canvas id="chartByYear"></canvas>
@@ -3358,6 +3794,7 @@
                 label: 'Taxonomie',
                 options: [
                     { value: 'nomvalide(R)', label: 'Nom scientifique' },
+                    { value: 'GROUPE', label: 'Groupe' },
                     { value: 'versionTAXREF', label: 'Version TAXREF' }
                 ]
             },
@@ -3422,6 +3859,7 @@
             'envoye_national',
             'nomCommune',
             'nomvalide(R)',
+            'GROUPE',
             'observateurIdentite'
         ];
 
@@ -3867,7 +4305,13 @@
             const c = String(clazz ?? '').trim();
             const o = String(order ?? '').trim();
 
-            if (k === 'Plantae' || c === 'Equisetopsida' || c === 'Magnoliopsida' || c === 'Liliopsida' || c === 'Pinopsida') return 'Plantes';
+            if (k === 'Plantae' || k === 'Viridiplantae'
+                || [
+                    'Equisetopsida', 'Magnoliopsida', 'Liliopsida', 'Pinopsida', 'Cycadopsida',
+                    'Ginkgoopsida', 'Gnetopsida', 'Polypodiopsida', 'Lycopodiopsida',
+                    'Bryopsida', 'Marchantiopsida', 'Jungermanniopsida', 'Anthocerotopsida',
+                    'Sphagnopsida', 'Polytrichopsida'
+                ].includes(c)) return 'Plantes';
             if (c === 'Amphibia') return 'Amphibiens';
             if (c === 'Reptilia') return 'Reptiles';
             if ((c && REPTILE_ORDERS.has(c)) || (o && REPTILE_ORDERS.has(o))) return 'Reptiles';
@@ -4853,7 +5297,11 @@
             if (low === 'oiseaux' || low === 'oiseau' || low === 'aves') return 'Oiseaux';
             if (low === 'mammifères' || low === 'mammiferes' || low === 'mammifère' || low === 'mammalia') return 'Mammifères';
             if (low === 'poissons' || low === 'poisson') return 'Poissons';
-            if (low === 'plantes' || low === 'plante' || low === 'plantae' || low === 'flore') return 'Plantes';
+            if (low === 'plantes' || low === 'plante' || low === 'plantae' || low === 'flore'
+                || low === 'végétaux' || low === 'vegetaux' || low === 'angiospermes' || low === 'trachéophytes'
+                || low === 'tracheophytes' || low === 'bryophytes' || low === 'ptéridophytes' || low === 'pteridophytes') {
+                return 'Plantes';
+            }
             // Insectes : pas de sous-détail sauf Odonates
             if (low === 'odonates' || low === 'odonate' || low === 'odonata') return 'Odonates';
             if (low === 'lépidoptères' || low === 'lepidopteres' || low === 'lépidoptère' || low === 'orthoptères' || low === 'orthopteres'
@@ -5081,6 +5529,7 @@
 
         setupRowDetailPanel();
         setupQuickFilters();
+        setupFiltersPanelLayout();
         setupSelectionControls();
         document.querySelector('.quick-filter-btn[data-quick-national=""]')?.classList.add('active');
 
@@ -5258,6 +5707,19 @@
             COLUMNS_WITH_SUGGESTIONS_SINP.forEach(col => {
                 if (col === 'observateurIdentite') {
                     uniqueValuesCache[col] = collectUniqueObserversFromRows(allData, col);
+                    return;
+                }
+                if (col === 'GROUPE') {
+                    const groups = new Set();
+                    allData.forEach(row => {
+                        const g = getEffectiveGroupeForSinpRow(row);
+                        if (g) groups.add(g);
+                    });
+                    uniqueValuesCache[col] = Array.from(groups).sort((a, b) => {
+                        if (/^autre$/i.test(a) && !/^autre$/i.test(b)) return 1;
+                        if (!/^autre$/i.test(a) && /^autre$/i.test(b)) return -1;
+                        return a.localeCompare(b, 'fr');
+                    });
                     return;
                 }
                 const values = new Set();
@@ -5445,6 +5907,18 @@
 
         function getRowValueForFilterColumn(row, column) {
             if (!row || !column) return undefined;
+            // GROUPE n'existe pas en SINP : toujours la valeur effective (vue + TaxRef)
+            if (column === 'GROUPE' || column === 'groupe') {
+                if (Object.prototype.hasOwnProperty.call(row, 'GROUPE') || Object.prototype.hasOwnProperty.call(row, 'groupe')) {
+                    const fromReadable = normalizeTaxonomicGroupLabel(row['GROUPE'] ?? row['groupe'] ?? '');
+                    if (fromReadable) return fromReadable;
+                }
+                const isSinpLike = row['identifiantOrigine'] !== undefined || row['nomCite'] !== undefined || row['Cadre_Acquisition'] !== undefined;
+                if (isSinpLike) return getEffectiveGroupeForSinpRow(row);
+                const orig = String(row['IDENTIFIANTORIGINE'] ?? '').trim();
+                const sinp = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                return sinp ? getEffectiveGroupeForSinpRow(sinp) : 'Autre';
+            }
             if (row[column] !== undefined && row[column] !== null && String(row[column]).trim() !== '') {
                 return row[column];
             }
@@ -5477,7 +5951,8 @@
                 COMMUNE: 'nomCommune',
                 OBS: 'observateurIdentite',
                 ENVOYE_NATIONAL: 'envoye_national',
-                NOM_TAXON: 'nomvalide(R)'
+                NOM_TAXON: 'nomvalide(R)',
+                GROUPE: 'GROUPE'
             };
             return map[column] || column;
         }
@@ -5537,6 +6012,18 @@
                 });
                 return sortValuesAlphabetically(names);
             }
+            if (column === 'GROUPE' || column === 'groupe') {
+                const groups = new Set();
+                rows.forEach(row => {
+                    const g = getRowValueForFilterColumn(row, 'GROUPE');
+                    if (g) groups.add(String(g).trim());
+                });
+                return Array.from(groups).sort((a, b) => {
+                    if (/^autre$/i.test(a) && !/^autre$/i.test(b)) return 1;
+                    if (!/^autre$/i.test(a) && /^autre$/i.test(b)) return -1;
+                    return a.localeCompare(b, 'fr');
+                });
+            }
             const values = new Set();
             rows.forEach(row => {
                 for (let i = 0; i < readCols.length; i++) {
@@ -5584,24 +6071,32 @@
             const selectedLower = new Set(selected.map(s => s.toLowerCase()));
             
             const isSpeciesColumn = columnForValues === 'nomvalide(R)' || columnForValues === 'NOM_TAXON';
-            const initialLimit = isSpeciesColumn && !forceShowAll && !filter ? 50 : 100;
+            const groupByYear = isYearSortColumn(columnForValues, mode);
+            const initialLimit = isSpeciesColumn && !forceShowAll && !filter ? 50 : (groupByYear ? 200 : 100);
             
             const allFiltered = values.filter(v => !filter || v.toLowerCase().includes(filter));
             // Garder les valeurs cochées visibles même si hors filtre de frappe
             const checkedAlways = values.filter(v => selectedLower.has(v.toLowerCase()));
-            const checkedFirst = [
-                ...checkedAlways,
-                ...allFiltered.filter(v => !selectedLower.has(v.toLowerCase()))
-            ];
-            // dédupliquer
+
+            let ordered = [];
             const seen = new Set();
-            const ordered = [];
-            checkedFirst.forEach(v => {
+            const pushUnique = (v) => {
                 const k = v.toLowerCase();
                 if (seen.has(k)) return;
                 seen.add(k);
                 ordered.push(v);
-            });
+            };
+
+            if (groupByYear) {
+                // Conserve l'ordre chronologique (année) pour les bandeaux
+                allFiltered.forEach(pushUnique);
+                checkedAlways.forEach(pushUnique);
+                ordered = sortValuesByYearThenAlpha(ordered);
+            } else {
+                checkedAlways.forEach(pushUnique);
+                allFiltered.forEach(pushUnique);
+            }
+
             const filtered = ordered.slice(0, forceShowAll ? ordered.length : Math.max(initialLimit, checkedAlways.length));
             const hasMore = ordered.length > filtered.length;
             
@@ -5623,7 +6118,25 @@
             info.textContent = `Clic = (dé)sélectionner${selNote}${scopeNote}`;
             dropdown.appendChild(info);
 
+            let lastYearKey = null;
             filtered.forEach((value, index) => {
+                if (groupByYear) {
+                    const y = extractYearFromValue(value);
+                    const yearKey = y === null ? 'Sans année' : String(y);
+                    if (yearKey !== lastYearKey) {
+                        lastYearKey = yearKey;
+                        const sep = document.createElement('div');
+                        sep.className = 'autocomplete-year-sep';
+                        sep.setAttribute('role', 'separator');
+                        sep.setAttribute('aria-label', `Année ${yearKey}`);
+                        const lab = document.createElement('span');
+                        lab.className = 'autocomplete-year-sep-label';
+                        lab.textContent = yearKey;
+                        sep.appendChild(lab);
+                        dropdown.appendChild(sep);
+                    }
+                }
+
                 const item = document.createElement('div');
                 const isChecked = selectedLower.has(value.toLowerCase());
                 item.className = `autocomplete-item${isChecked ? ' is-checked' : ''}`;
@@ -5648,7 +6161,6 @@
                 item.appendChild(label);
                 
                 item.addEventListener('mousedown', (e) => {
-                    // Empêche le blur/fermeture avant le toggle
                     e.preventDefault();
                     e.stopPropagation();
                 });
@@ -5661,7 +6173,7 @@
                 dropdown.appendChild(item);
             });
 
-            if (hasMore && isSpeciesColumn && !filter) {
+            if (hasMore && (isSpeciesColumn || groupByYear) && !filter) {
                 const showMoreBtn = document.createElement('div');
                 showMoreBtn.className = 'autocomplete-show-more';
                 showMoreBtn.innerHTML = `<span>▼ Voir les ${ordered.length - filtered.length} autres</span>`;
@@ -5757,7 +6269,7 @@
                                     if (col === 'observateurIdentite') return observerFieldMatchesSearch(row[col], filter.value);
                                     const val = row[col];
                                     return val && String(val).toLowerCase().includes(filter.value);
-                                });
+                                }) || String(getRowValueForFilterColumn(row, 'GROUPE') || '').toLowerCase().includes(filter.value);
                             }
                         });
                     });
@@ -5784,17 +6296,36 @@
             updateNoObservationToggle();
             displayResults();
             
-            // Synchroniser avec la carte si elle est initialisée
+            // Synchroniser carte + analyses avec les filtres communs
             if (typeof map !== 'undefined' && map) {
+                scheduleMapPointsUpdate(selectedRowKeys.size > 0);
+            }
+            scheduleAnalyticsRefresh();
+        }
+
+        // Reset global (bandeau + filtres communs)
+        function resetMapFiltersOnly() {
+            if (typeof clearMapDrawnZone === 'function') clearMapDrawnZone();
+            if (typeof map !== 'undefined' && map && typeof applyMapFilters === 'function') {
                 applyMapFilters();
-            } else {
-                scheduleAnalyticsRefresh();
             }
         }
 
-        // Reset
-        resetBtn.addEventListener('click', () => {
-            // Supprimer tous les filtres sauf le premier
+        function resetAnalyticsFiltersOnly() {
+            const scope = document.getElementById('analyticsScope');
+            const year = document.getElementById('analyticsYear');
+            const zone = document.getElementById('analyticsZoneField');
+            const group = document.getElementById('analyticsGroupFilter');
+            const species = document.getElementById('analyticsSpeciesFilter');
+            if (scope) scope.value = 'search';
+            if (year) year.value = '';
+            if (zone && zone.options.length) zone.selectedIndex = 0;
+            if (group) group.value = '';
+            if (species) species.value = '';
+            analyticsSelectedGroupDetail = '';
+        }
+
+        function resetAllSearches() {
             document.querySelectorAll('.filter-row').forEach((row, index) => {
                 if (index > 0) {
                     const connector = row.previousElementSibling;
@@ -5804,19 +6335,18 @@
                     row.remove();
                 }
             });
-            
-            // Réinitialiser le premier filtre
+
             const firstColumn = document.querySelector('.filter-column[data-filter-id="0"]');
             const firstSearch = document.querySelector('.filter-search[data-filter-id="0"]');
             const firstDropdown = document.querySelector('.autocomplete-dropdown[data-filter-id="0"]');
-            
+
             if (firstColumn) firstColumn.value = '';
             if (firstSearch) firstSearch.value = '';
             if (firstDropdown) {
                 firstDropdown.classList.remove('active');
                 firstDropdown.innerHTML = '';
             }
-            
+
             activeFilters = [{ id: 0, column: '', value: '' }];
             filterCounter = 1;
             filterMultiSelected.clear();
@@ -5830,41 +6360,30 @@
             document.querySelectorAll('[data-quick-year]').forEach(b => {
                 b.classList.toggle('active', (b.dataset.quickYear ?? '') === '');
             });
-            filteredData = [...allData];
-            baseFilteredData = [...allData];
+            filteredData = applyObservationVisibilityFilter([...allData]);
+            baseFilteredData = [...filteredData];
             currentPage = 1;
             sortColumn = null;
             sortDirection = 'asc';
             showAllSpecies = {};
             clearRowSelection();
-            
-            // Scroll retour au début
-            tableWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+
+            if (typeof tableWrapper !== 'undefined' && tableWrapper) {
+                tableWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+            }
             updateActiveFiltersBar();
             displayResults();
-            
-            // Synchroniser avec la carte si elle est initialisée
-            if (typeof map !== 'undefined' && map) {
-                // Reset aussi les filtres de la carte
-                document.getElementById('mapProjectFilter').value = '';
-                const mapYear = document.getElementById('mapYearFilter');
-                if (mapYear) mapYear.value = '';
-                const obsInput = document.getElementById('mapObserverFilter');
-                if (obsInput) {
-                    obsInput.value = '';
-                    obsInput.classList.remove('has-value');
-                }
-                document.getElementById('mapSpeciesFilter').value = '';
-                const mapGroup = document.getElementById('mapGroupFilter');
-                if (mapGroup) mapGroup.value = '';
-                const dropdown = document.getElementById('observerDropdown');
-                if (dropdown) dropdown.classList.remove('active');
-                if (typeof clearMapDrawnZone === 'function') clearMapDrawnZone();
-                applyMapFilters();
-            } else {
-                refreshAnalytics();
-            }
-        });
+
+            resetMapFiltersOnly();
+            resetAnalyticsFiltersOnly();
+            if (typeof scheduleAnalyticsRefresh === 'function') scheduleAnalyticsRefresh();
+            else if (typeof refreshAnalytics === 'function') refreshAnalytics();
+        }
+
+        const headerResetAllBtn = document.getElementById('headerResetAllBtn');
+        if (headerResetAllBtn) headerResetAllBtn.addEventListener('click', resetAllSearches);
+
+        resetBtn.addEventListener('click', resetAllSearches);
 
         // Sort
         function sortData(column) {
@@ -6540,6 +7059,145 @@
             });
         }
 
+        function setupFiltersPanelLayout() {
+            const filtersRoot = document.getElementById('sharedFiltersRoot') || document.getElementById('tab-search');
+            const searchSection = document.getElementById('searchSection');
+            const filtersBody = document.getElementById('filtersPanelBody');
+            const resizeBar = document.getElementById('filtersResizeBar');
+            const toggleBtns = [
+                document.getElementById('toggleFiltersPanelBtn'),
+                document.getElementById('toggleFiltersPanelBtnBar')
+            ].filter(Boolean);
+            if (!filtersRoot || !searchSection || !filtersBody || !resizeBar || toggleBtns.length === 0) return;
+
+            const STORAGE_COLLAPSED = 'cen_filters_collapsed';
+            const STORAGE_HEIGHT = 'cen_filters_height_px';
+            let collapsed = localStorage.getItem(STORAGE_COLLAPSED) === '1';
+            let savedHeight = parseInt(localStorage.getItem(STORAGE_HEIGHT) || '', 10);
+            if (!Number.isFinite(savedHeight) || savedHeight < 70) savedHeight = 0;
+
+            function contentExpandLabel() {
+                const active = document.querySelector('.tab-btn.active')?.dataset?.tab;
+                if (active === 'map') return 'Agrandir la carte';
+                if (active === 'analytics') return 'Agrandir les graphiques';
+                return 'Agrandir le tableau';
+            }
+
+            function syncToggleLabels() {
+                const expandLabel = contentExpandLabel();
+                toggleBtns.forEach(btn => {
+                    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                    const label = btn.querySelector('.toggle-filters-label');
+                    if (label) label.textContent = collapsed ? 'Afficher les filtres' : expandLabel;
+                    btn.title = collapsed
+                        ? 'Réafficher la zone de filtres'
+                        : `Masquer les filtres pour ${expandLabel.toLowerCase()}`;
+                });
+            }
+
+            window.syncSharedFiltersToggleLabels = syncToggleLabels;
+
+            function applyCollapsedState() {
+                filtersRoot.classList.toggle('filters-collapsed', collapsed);
+                if (collapsed) {
+                    filtersBody.style.maxHeight = '';
+                    filtersBody.style.height = '';
+                } else if (savedHeight > 0) {
+                    const maxCap = Math.max(120, Math.floor(window.innerHeight * 0.5));
+                    const h = Math.min(Math.max(savedHeight, 70), maxCap);
+                    filtersBody.style.maxHeight = `${h}px`;
+                    filtersBody.style.height = `${h}px`;
+                } else {
+                    filtersBody.style.maxHeight = '';
+                    filtersBody.style.height = '';
+                }
+                syncToggleLabels();
+                const active = document.querySelector('.tab-btn.active')?.dataset?.tab;
+                if (active === 'map' && typeof map !== 'undefined' && map) {
+                    setTimeout(() => map.invalidateSize({ animate: false }), 80);
+                }
+                if (active === 'analytics') {
+                    requestAnimationFrame(() => { if (typeof resizeAnalyticsCharts === 'function') resizeAnalyticsCharts(); });
+                }
+            }
+
+            function setCollapsed(next) {
+                collapsed = !!next;
+                localStorage.setItem(STORAGE_COLLAPSED, collapsed ? '1' : '0');
+                applyCollapsedState();
+            }
+
+            function toggleCollapsed() {
+                setCollapsed(!collapsed);
+            }
+
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleCollapsed();
+                });
+            });
+
+            let dragging = false;
+            let startY = 0;
+            let startH = 0;
+
+            function onPointerMove(e) {
+                if (!dragging || collapsed) return;
+                if (e.cancelable && e.touches) e.preventDefault();
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const dy = clientY - startY;
+                const maxCap = Math.max(140, Math.floor(window.innerHeight * 0.55));
+                const next = Math.min(Math.max(startH + dy, 70), maxCap);
+                filtersBody.style.maxHeight = `${next}px`;
+                filtersBody.style.height = `${next}px`;
+                savedHeight = next;
+            }
+
+            function stopDrag() {
+                if (!dragging) return;
+                dragging = false;
+                resizeBar.classList.remove('is-dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                if (savedHeight > 0) localStorage.setItem(STORAGE_HEIGHT, String(Math.round(savedHeight)));
+                window.removeEventListener('mousemove', onPointerMove);
+                window.removeEventListener('mouseup', stopDrag);
+                window.removeEventListener('touchmove', onPointerMove);
+                window.removeEventListener('touchend', stopDrag);
+            }
+
+            function startDrag(e) {
+                if (collapsed) return;
+                if (e.target.closest('.btn-toggle-filters')) return;
+                dragging = true;
+                resizeBar.classList.add('is-dragging');
+                startY = e.touches ? e.touches[0].clientY : e.clientY;
+                startH = filtersBody.getBoundingClientRect().height;
+                document.body.style.cursor = 'row-resize';
+                document.body.style.userSelect = 'none';
+                window.addEventListener('mousemove', onPointerMove);
+                window.addEventListener('mouseup', stopDrag);
+                window.addEventListener('touchmove', onPointerMove, { passive: false });
+                window.addEventListener('touchend', stopDrag);
+                e.preventDefault();
+            }
+
+            resizeBar.addEventListener('mousedown', startDrag);
+            resizeBar.addEventListener('touchstart', startDrag, { passive: false });
+            resizeBar.addEventListener('dblclick', (e) => {
+                if (e.target.closest('.btn-toggle-filters')) return;
+                toggleCollapsed();
+            });
+            resizeBar.addEventListener('click', (e) => {
+                if (!collapsed) return;
+                if (e.target.closest('.btn-toggle-filters')) return;
+                setCollapsed(false);
+            });
+
+            applyCollapsedState();
+        }
+
         function setupQuickFilters() {
             document.querySelectorAll('#quickFilters [data-quick-national]').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -6593,6 +7251,9 @@
                     requestAnimationFrame(() => resizeAnalyticsCharts());
                     setTimeout(resizeAnalyticsCharts, 120);
                 }
+                if (typeof window.syncSharedFiltersToggleLabels === 'function') {
+                    window.syncSharedFiltersToggleLabels();
+                }
             });
         });
 
@@ -6614,6 +7275,7 @@
             custom: new Map()
         };
         let analyticsSelectedGroupDetail = '';
+        let lastAnalyticsGroupSpeciesMap = new Map();
         let analyticsCustomChartCounter = 0;
         let analyticsCustomChartConfigs = [];
         const ANALYTICS_X_OPTIONS = [
@@ -7067,37 +7729,7 @@
                 baseLayers[e.target.value].addTo(map);
             });
 
-            // Remplir les filtres
-            populateMapFilters();
-
-            // Event listeners pour les filtres
-            document.getElementById('mapProjectFilter').addEventListener('change', applyMapFilters);
-            document.getElementById('mapYearFilter').addEventListener('change', applyMapFilters);
-            document.getElementById('mapSpeciesFilter').addEventListener('change', applyMapFilters);
-            document.getElementById('mapGroupFilter').addEventListener('change', () => {
-                populateMapSpeciesOptions();
-                applyMapFilters();
-            });
-            
-            // Setup autocomplete pour observateur
-            setupMapObserverAutocomplete();
-
-            document.getElementById('clearMapDrawZone').addEventListener('click', () => {
-                clearMapDrawnZone();
-                applyMapFilters();
-            });
-            
-            // Reset des filtres de la carte
-            document.getElementById('resetMapFilters').addEventListener('click', () => {
-                document.getElementById('mapProjectFilter').value = '';
-                document.getElementById('mapYearFilter').value = '';
-                const obsInput = document.getElementById('mapObserverFilter');
-                obsInput.value = '';
-                obsInput.classList.remove('has-value');
-                document.getElementById('mapGroupFilter').value = '';
-                populateMapSpeciesOptions();
-                document.getElementById('mapSpeciesFilter').value = '';
-                document.getElementById('observerDropdown').classList.remove('active');
+            document.getElementById('clearMapDrawZone')?.addEventListener('click', () => {
                 clearMapDrawnZone();
                 applyMapFilters();
             });
@@ -7114,12 +7746,26 @@
             return getEffectiveGroupeForSinpRow(row);
         }
 
+        /** Nom d'espèce pour analyses / filtres : SINP puis fallback vue lisible. */
+        function getSpeciesLabelForSinpRow(row) {
+            const fromSinp = String(row?.['nomCite'] || row?.['nomvalide(R)'] || '').trim();
+            if (fromSinp && !isNrToken(fromSinp)) return fromSinp;
+            const id = String(row?.['identifiantOrigine'] ?? '').trim();
+            const rr = id && readableById.has(id) ? readableById.get(id) : null;
+            const fromReadable = String(rr?.['NOM_TAXON'] ?? rr?.['nom_taxon'] ?? '').trim();
+            if (fromReadable && !isNrToken(fromReadable)) return fromReadable;
+            return fromSinp || fromReadable || '';
+        }
+
         function extractSearchFilteredData() {
             const searchFilters = [];
             document.querySelectorAll('.filter-row').forEach(row => {
-                const column = row.querySelector('.filter-column').value;
+                const columnRaw = row.querySelector('.filter-column').value;
                 const value = row.querySelector('.filter-search').value.trim().toLowerCase();
-                if (value) searchFilters.push({ column, value });
+                if (!value) return;
+                // Harmonise colonnes vue lisible → SINP pour les analyses
+                const column = normalizeSuggestionColumn(columnRaw, 'sinp');
+                searchFilters.push({ column: column === 'GROUPE' || columnRaw === 'GROUPE' ? 'GROUPE' : column, value });
             });
 
             let rows = [...allData];
@@ -7139,7 +7785,7 @@
                             if (col === 'observateurIdentite') return observerFieldMatchesSearch(row[col], filter.value);
                             const val = row[col];
                             return val && String(val).toLowerCase().includes(filter.value);
-                        });
+                        }) || String(getRowValueForFilterColumn(row, 'GROUPE') || '').toLowerCase().includes(filter.value);
                     });
                 });
             }
@@ -7156,21 +7802,8 @@
         }
 
         function extractMapFilteredData(includeZone = true) {
-            const projectFilter = document.getElementById('mapProjectFilter').value;
-            const yearFilter = document.getElementById('mapYearFilter').value;
-            const observerFilter = document.getElementById('mapObserverFilter').value;
-            const speciesFilter = document.getElementById('mapSpeciesFilter').value;
-            const groupFilter = document.getElementById('mapGroupFilter').value;
-
+            // Même base que le tableau / les analyses : filtres communs
             let baseData = extractSearchFilteredData();
-
-            if (projectFilter) baseData = baseData.filter(row => row['Cadre_Acquisition'] === projectFilter);
-            if (yearFilter) baseData = baseData.filter(row => parseYearFromJourDate(row['jourdateDebut']) === yearFilter);
-            if (observerFilter) {
-                baseData = baseData.filter(row => observerFieldMatchesSearch(row['observateurIdentite'], observerFilter));
-            }
-            if (speciesFilter) baseData = baseData.filter(row => row['nomCite'] === speciesFilter || row['nomvalide(R)'] === speciesFilter);
-            if (groupFilter) baseData = baseData.filter(row => getTaxonomicGroupForSinpRow(row) === groupFilter);
             if (includeZone && mapDrawnGeometry) {
                 baseData = baseData.filter(row => {
                     const ll = rowObservationLatLng(row);
@@ -7178,7 +7811,6 @@
                     return pointInMapDrawnGeometry(ll.lat, ll.lng);
                 });
             }
-
             return baseData;
         }
 
@@ -7190,8 +7822,9 @@
         }
 
         function applyMapFilters() {
+            // Aligné sur les filtres communs (+ zone dessinée)
             const baseData = extractMapFilteredData(true);
-            baseFilteredData = baseData;
+            baseFilteredData = applyObservationVisibilityFilter(baseData);
             pruneSelectionToBase();
             syncFilteredDataFromSelection();
             currentPage = 1;
@@ -7226,7 +7859,7 @@
 
                 const rowKey = getRowSelectionKey(row);
                 if (!popupCache.has(rowKey)) {
-                    const species = row['nomCite'] || row['nomvalide(R)'] || 'Non renseigné';
+                    const species = getSpeciesLabelForSinpRow(row) || 'Non renseigné';
                     const date = row['jourdateDebut'] || 'Non renseignée';
                     const project = row['Cadre_Acquisition'] || 'Non renseigné';
                     const observer = stripObservateurSinp(row['observateurIdentite']) || 'Non renseigné';
@@ -7292,8 +7925,8 @@
 
         function populateMapSpeciesOptions() {
             const speciesSelect = document.getElementById('mapSpeciesFilter');
-            const groupFilter = document.getElementById('mapGroupFilter')?.value || '';
             if (!speciesSelect) return;
+            const groupFilter = document.getElementById('mapGroupFilter')?.value || '';
 
             const previousSpecies = speciesSelect.value;
             while (speciesSelect.options.length > 1) speciesSelect.remove(1);
@@ -7301,7 +7934,7 @@
             const species = new Set();
             allData.forEach(row => {
                 if (groupFilter && getTaxonomicGroupForSinpRow(row) !== groupFilter) return;
-                const sp = row['nomCite'] || row['nomvalide(R)'];
+                const sp = getSpeciesLabelForSinpRow(row);
                 if (sp) species.add(sp);
             });
 
@@ -7313,7 +7946,6 @@
                 speciesSelect.appendChild(option);
             });
 
-            // Conserve l'espèce si elle appartient encore au groupe, sinon reset
             if (previousSpecies && species.has(previousSpecies)) {
                 speciesSelect.value = previousSpecies;
             } else {
@@ -7322,70 +7954,14 @@
         }
 
         function populateMapFilters() {
-            // Projets
-            const projectSelect = document.getElementById('mapProjectFilter');
-            const projects = new Set();
-            allData.forEach(row => {
-                const project = row['Cadre_Acquisition'];
-                if (project) projects.add(project);
-            });
-            sortValuesByYearThenAlpha(projects).forEach(project => {
-                const option = document.createElement('option');
-                option.value = project;
-                option.textContent = project.length > 40 ? project.substring(0, 40) + '...' : project;
-                option.title = project;
-                projectSelect.appendChild(option);
-            });
-
-            // Années (même logique que la colonne ANNEE : date de début d’observation)
-            const yearSelect = document.getElementById('mapYearFilter');
-            while (yearSelect.options.length > 1) yearSelect.remove(1);
-            const years = new Set();
-            allData.forEach(row => {
-                const y = parseYearFromJourDate(row['jourdateDebut']);
-                if (y) years.add(y);
-            });
-            Array.from(years).sort((a, b) => b.localeCompare(a)).forEach(y => {
-                const option = document.createElement('option');
-                option.value = y;
-                option.textContent = y;
-                yearSelect.appendChild(option);
-            });
-
-            // Observateurs individuels (découpés par virgule) pour l'autocomplete
-            const observers = new Set();
-            allData.forEach(row => {
-                parseObservateurs(row['observateurIdentite']).forEach(name => observers.add(name));
-            });
-            mapObserversList = sortValuesAlphabetically(observers);
-
-            // Groupes : même source que la colonne GROUPE (vue + TaxRef si trou dans la vue)
-            const groupSelect = document.getElementById('mapGroupFilter');
-            while (groupSelect.options.length > 1) groupSelect.remove(1);
-            const groups = new Set();
-            allData.forEach(row => {
-                const g = getEffectiveGroupeForSinpRow(row);
-                if (g) groups.add(g);
-            });
-            Array.from(groups).sort((a, b) => {
-                if (/^autre$/i.test(a) && !/^autre$/i.test(b)) return 1;
-                if (!/^autre$/i.test(a) && /^autre$/i.test(b)) return -1;
-                return a.localeCompare(b, 'fr');
-            }).forEach(g => {
-                const option = document.createElement('option');
-                option.value = g;
-                option.textContent = g.length > 35 ? g.substring(0, 35) + '...' : g;
-                option.title = g;
-                groupSelect.appendChild(option);
-            });
-
-            // Espèces (filtrées selon le groupe sélectionné)
-            populateMapSpeciesOptions();
+            // Filtres carte dédiés retirés : les filtres communs s’appliquent partout
+            return;
         }
 
         function setupMapObserverAutocomplete() {
             const input = document.getElementById('mapObserverFilter');
             const dropdown = document.getElementById('observerDropdown');
+            if (!input || !dropdown) return;
             let selectedIdx = -1;
 
             function renderSuggestions(filter = '') {
@@ -7497,38 +8073,91 @@
         }
 
         function parsePositiveCount(value) {
-            const n = Number(value);
+            if (value === null || value === undefined || value === '') return 0;
+            const n = Number(String(value).trim().replace(/\s/g, '').replace(',', '.'));
             if (!Number.isFinite(n) || n < 0) return 0;
             return n;
         }
 
-        function getEstimatedIndividuals(row) {
-            const minVal = parsePositiveCount(row['denombrementMin']);
-            const maxVal = parsePositiveCount(row['denombrementMax']);
+        /** Effectif estimé : milieu de min–max si renseigné, sinon null (présence sans dénombrement). */
+        function getDenombrementEstimate(row) {
+            const minVal = parsePositiveCount(row?.['denombrementMin']);
+            const maxVal = parsePositiveCount(row?.['denombrementMax']);
+            if (minVal <= 0 && maxVal <= 0) return null;
             if (maxVal > 0 && minVal > 0) return Math.round((minVal + maxVal) / 2);
-            if (maxVal > 0) return maxVal;
-            if (minVal > 0) return minVal;
-            return 1;
+            return maxVal > 0 ? maxVal : minVal;
+        }
+
+        /** @deprecated préfère getDenombrementEstimate — conserve compatibilité (0 si absence) */
+        function getEstimatedIndividuals(row) {
+            return getDenombrementEstimate(row) ?? 0;
         }
 
         function getCountType(row) {
             return decodeObjetDenombrementToType(row['objetDenombrement'], row['nomCite'] || row['nomvalide(R)']) || 'Individu';
         }
 
-        function destroyAnalyticsCharts() {
-            if (analyticsCharts.speciesByZone) analyticsCharts.speciesByZone.destroy();
-            if (analyticsCharts.phenology) analyticsCharts.phenology.destroy();
-            if (analyticsCharts.byGroup) analyticsCharts.byGroup.destroy();
-            if (analyticsCharts.byYear) analyticsCharts.byYear.destroy();
-            if (analyticsCharts.custom) {
-                analyticsCharts.custom.forEach(chart => chart.destroy());
-                analyticsCharts.custom.clear();
+        function normalizeCountKindKey(typeRaw) {
+            return String(typeRaw || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
+        /** famille d’effectif : couple | individu | other */
+        function classifyDenombrementKind(row) {
+            const t = normalizeCountKindKey(getCountType(row));
+            if (!t) return 'individu';
+            if (t === 'cpl' || t.includes('couple')) return 'couple';
+            if (t === 'ind' || t.includes('individ')) return 'individu';
+            return 'other';
+        }
+
+        function emptyMetricBucket() {
+            return { count: 0, individuals: 0, couples: 0, otherUnits: 0, presenceOnly: 0, speciesSet: new Set() };
+        }
+
+        function accumulateObservationMetrics(row, bucket) {
+            bucket.count += 1;
+            const sp = getSpeciesLabelForSinpRow(row);
+            if (sp) bucket.speciesSet.add(sp);
+            const est = getDenombrementEstimate(row);
+            if (est === null) {
+                bucket.presenceOnly += 1;
+                return;
             }
-            analyticsCharts.speciesByZone = null;
-            analyticsCharts.phenology = null;
-            analyticsCharts.byGroup = null;
-            analyticsCharts.byYear = null;
-            analyticsCharts.custom = new Map();
+            const kind = classifyDenombrementKind(row);
+            if (kind === 'couple') bucket.couples += est;
+            else if (kind === 'individu') bucket.individuals += est;
+            else bucket.otherUnits += est;
+        }
+
+        function resetChartCanvas(canvasId) {
+            const old = document.getElementById(canvasId);
+            if (!old || !old.parentNode) return null;
+            const next = document.createElement('canvas');
+            next.id = canvasId;
+            old.parentNode.replaceChild(next, old);
+            return next;
+        }
+
+        function destroyAnalyticsCharts() {
+            const keys = ['speciesByZone', 'phenology', 'byGroup', 'byYear'];
+            keys.forEach((k) => {
+                try {
+                    if (analyticsCharts[k]) analyticsCharts[k].destroy();
+                } catch (e) { /* ignore */ }
+                analyticsCharts[k] = null;
+            });
+            if (analyticsCharts.custom) {
+                analyticsCharts.custom.forEach((chart) => {
+                    try { chart.destroy(); } catch (e) { /* ignore */ }
+                });
+                analyticsCharts.custom.clear();
+            } else {
+                analyticsCharts.custom = new Map();
+            }
         }
 
         function populateAnalyticsYears() {
@@ -7719,7 +8348,14 @@
                     ...base.plugins,
                     ...extra.plugins,
                     legend: { ...(base.plugins?.legend || {}), ...(extra.plugins.legend || {}) },
-                    tooltip: { ...(base.plugins?.tooltip || {}), ...(extra.plugins.tooltip || {}) }
+                    tooltip: {
+                        ...(base.plugins?.tooltip || {}),
+                        ...(extra.plugins.tooltip || {}),
+                        callbacks: {
+                            ...(base.plugins?.tooltip?.callbacks || {}),
+                            ...(extra.plugins?.tooltip?.callbacks || {})
+                        }
+                    }
                 };
             }
             if (extra.scales) {
@@ -7842,7 +8478,7 @@
             if (yAxis === 'count') return bucket.count;
             if (yAxis === 'individuals') return bucket.individuals;
             if (yAxis === 'couples') return bucket.couples;
-            return bucket.speciesSet.size;
+            return bucket.speciesSet ? bucket.speciesSet.size : 0;
         }
 
         function buildCustomChartDatasets(dataset, config, topN) {
@@ -7855,17 +8491,8 @@
                 const aggregates = new Map();
                 dataset.forEach(row => {
                     const key = getAnalyticsXValue(row, xAxis);
-                    if (!aggregates.has(key)) {
-                        aggregates.set(key, { count: 0, individuals: 0, couples: 0, speciesSet: new Set() });
-                    }
-                    const bucket = aggregates.get(key);
-                    const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
-                    const type = getCountType(row).toLowerCase();
-                    const count = getEstimatedIndividuals(row);
-                    bucket.count += 1;
-                    if (type === 'individu' || type === 'ind') bucket.individuals += count;
-                    if (type === 'couple') bucket.couples += count;
-                    if (species) bucket.speciesSet.add(species);
+                    if (!aggregates.has(key)) aggregates.set(key, emptyMetricBucket());
+                    accumulateObservationMetrics(row, aggregates.get(key));
                 });
 
                 let keys = sortAnalyticsKeys(Array.from(aggregates.keys()), xAxis).slice(0, maxItems);
@@ -7893,17 +8520,8 @@
                 const groupKey = getAnalyticsXValue(row, groupBy) || 'NR';
                 if (!nested.has(xKey)) nested.set(xKey, new Map());
                 const groupMap = nested.get(xKey);
-                if (!groupMap.has(groupKey)) {
-                    groupMap.set(groupKey, { count: 0, individuals: 0, couples: 0, speciesSet: new Set() });
-                }
-                const bucket = groupMap.get(groupKey);
-                const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
-                const type = getCountType(row).toLowerCase();
-                const count = getEstimatedIndividuals(row);
-                bucket.count += 1;
-                if (type === 'individu' || type === 'ind') bucket.individuals += count;
-                if (type === 'couple') bucket.couples += count;
-                if (species) bucket.speciesSet.add(species);
+                if (!groupMap.has(groupKey)) groupMap.set(groupKey, emptyMetricBucket());
+                accumulateObservationMetrics(row, groupMap.get(groupKey));
             });
 
             const xKeys = sortAnalyticsKeys(Array.from(nested.keys()), xAxis).slice(0, maxItems);
@@ -7949,7 +8567,7 @@
             if (xAxis === 'month') return getMonthFromJourDate(row['jourdateDebut']) || 'NR';
             if (xAxis === 'year') return parseYearFromJourDate(row['jourdateDebut']) || 'NR';
             if (xAxis === 'group') return getTaxonomicGroupForSinpRow(row) || 'Autre';
-            if (xAxis === 'species') return (row['nomCite'] || row['nomvalide(R)'] || 'Non renseignee').trim();
+            if (xAxis === 'species') return getSpeciesLabelForSinpRow(row) || 'Non renseignee';
             if (xAxis === 'lifeStage') return decodeOccStadeToStadeAge(row['occStadeDeVie']) || 'Non renseigne';
             if (xAxis === 'commune') return (row['nomCommune'] || 'Non renseignee').trim();
             if (xAxis === 'project') return (row['Cadre_Acquisition'] || 'Non renseigne').trim();
@@ -7979,6 +8597,8 @@
             const titleEl = document.getElementById('groupSpeciesDetailTitle');
             if (!btnContainer || !namesEl || !titleEl) return;
 
+            lastAnalyticsGroupSpeciesMap = groupMap;
+
             const entries = Array.from(groupMap.entries())
                 .map(([group, speciesSet]) => ({ group, species: Array.from(speciesSet).sort((a, b) => a.localeCompare(b, 'fr')), count: speciesSet.size }))
                 .sort((a, b) => {
@@ -7998,22 +8618,27 @@
                 return;
             }
 
-            // Si le groupe ouvert n'existe plus dans le périmètre, on referme
             if (analyticsSelectedGroupDetail && !entries.some(e => e.group === analyticsSelectedGroupDetail)) {
                 analyticsSelectedGroupDetail = '';
             }
 
-            btnContainer.innerHTML = entries.map(entry => (
-                `<button type="button" class="group-species-btn${entry.group === analyticsSelectedGroupDetail ? ' active' : ''}" data-group="${escapeHtml(entry.group)}" aria-expanded="${entry.group === analyticsSelectedGroupDetail ? 'true' : 'false'}" title="Afficher / masquer les espèces">${escapeHtml(entry.group)} (${entry.count})</button>`
-            )).join('');
-
-            btnContainer.querySelectorAll('.group-species-btn').forEach(btn => {
+            btnContainer.innerHTML = '';
+            entries.forEach(entry => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `group-species-btn${entry.group === analyticsSelectedGroupDetail ? ' active' : ''}`;
+                btn.dataset.group = entry.group;
+                btn.setAttribute('aria-expanded', entry.group === analyticsSelectedGroupDetail ? 'true' : 'false');
+                btn.title = 'Afficher / masquer les espèces';
+                btn.textContent = `${entry.group} (${entry.count})`;
                 btn.addEventListener('click', () => {
                     const group = btn.dataset.group || '';
-                    // Toggle : recliquer le même groupe referme la liste
                     analyticsSelectedGroupDetail = (analyticsSelectedGroupDetail === group) ? '' : group;
-                    refreshAnalytics();
+                    renderGroupSpeciesDetails(lastAnalyticsGroupSpeciesMap);
+                    highlightGroupOnDoughnut(analyticsSelectedGroupDetail);
+                    scrollToGroupSpeciesDetail();
                 });
+                btnContainer.appendChild(btn);
             });
 
             if (!analyticsSelectedGroupDetail) {
@@ -8038,6 +8663,21 @@
             namesEl.classList.add('is-open');
         }
 
+        function highlightGroupOnDoughnut(groupName) {
+            const chart = analyticsCharts.byGroup;
+            if (!chart) return;
+            const labels = chart.data.labels || [];
+            const idx = labels.findIndex(l => l === groupName);
+            chart.setActiveElements(idx >= 0 ? [{ datasetIndex: 0, index: idx }] : []);
+            chart.update('none');
+        }
+
+        function scrollToGroupSpeciesDetail() {
+            const panel = document.getElementById('groupSpeciesDetailPanel');
+            if (!panel) return;
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         function refreshAnalytics() {
             const scopeSelect = document.getElementById('analyticsScope');
             if (!scopeSelect || allData.length === 0) return;
@@ -8049,8 +8689,7 @@
             const selectedGroup = document.getElementById('analyticsGroupFilter').value;
             let scopeDataset = [];
 
-            if (scope === 'search') scopeDataset = extractSearchFilteredData();
-            if (scope === 'map') scopeDataset = extractMapFilteredData(false);
+            if (scope === 'search' || scope === 'map') scopeDataset = extractSearchFilteredData();
             if (scope === 'map-zone') scopeDataset = extractMapFilteredData(true);
 
             if (analyticsYear) {
@@ -8061,7 +8700,7 @@
             const speciesInScope = new Set();
             scopeDataset.forEach(row => {
                 const g = getTaxonomicGroupForSinpRow(row);
-                const s = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                const s = getSpeciesLabelForSinpRow(row);
                 if (g) groupsInScope.add(g);
                 if (s) speciesInScope.add(s);
             });
@@ -8082,7 +8721,7 @@
 
             const speciesCandidates = scopeDataset
                 .filter(row => !selectedGroup || getTaxonomicGroupForSinpRow(row) === selectedGroup)
-                .map(row => (row['nomCite'] || row['nomvalide(R)'] || '').trim())
+                .map(row => getSpeciesLabelForSinpRow(row))
                 .filter(Boolean);
             if (speciesSelect) {
                 const prevSp = speciesSelect.value;
@@ -8100,45 +8739,37 @@
             const appliedGroup = document.getElementById('analyticsGroupFilter').value;
             const appliedSpecies = document.getElementById('analyticsSpeciesFilter').value;
             if (appliedGroup) dataset = dataset.filter(row => getTaxonomicGroupForSinpRow(row) === appliedGroup);
-            if (appliedSpecies) dataset = dataset.filter(row => (row['nomCite'] || row['nomvalide(R)'] || '').trim() === appliedSpecies);
+            if (appliedSpecies) dataset = dataset.filter(row => getSpeciesLabelForSinpRow(row) === appliedSpecies);
 
-            const speciesSet = new Set();
-            let estimatedIndividuals = 0;
-            let couplesCount = 0;
-            dataset.forEach(row => {
-                const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
-                if (species) speciesSet.add(species);
-                const type = getCountType(row).toLowerCase();
-                const count = getEstimatedIndividuals(row);
-                if (type === 'couple') couplesCount += count;
-                if (type === 'individu' || type === 'ind') estimatedIndividuals += count;
-            });
+            const totals = emptyMetricBucket();
+            dataset.forEach(row => accumulateObservationMetrics(row, totals));
+            const speciesSet = totals.speciesSet;
 
-            document.getElementById('kpiObservations').textContent = dataset.length.toLocaleString('fr-FR');
+            document.getElementById('kpiObservations').textContent = totals.count.toLocaleString('fr-FR');
             document.getElementById('kpiSpecies').textContent = speciesSet.size.toLocaleString('fr-FR');
-            document.getElementById('kpiIndividuals').textContent = estimatedIndividuals.toLocaleString('fr-FR');
-            document.getElementById('kpiCouples').textContent = couplesCount.toLocaleString('fr-FR');
+            document.getElementById('kpiIndividuals').textContent = totals.individuals.toLocaleString('fr-FR');
+            document.getElementById('kpiCouples').textContent = totals.couples.toLocaleString('fr-FR');
 
-            const scopeLabel = scope === 'search'
-                ? 'filtres de recherche'
-                : (scope === 'map' ? 'filtres de carte (hors zone)' : 'filtres carte + zone dessinée');
+            const scopeLabel = scope === 'map-zone'
+                ? 'filtres communs + zone dessinée'
+                : 'filtres communs';
             document.getElementById('analyticsScopeInfo').textContent =
-                `Périmètre : ${scopeLabel}${analyticsYear ? ` · année ${analyticsYear}` : ''}${appliedGroup ? ` · ${appliedGroup}` : ''}${appliedSpecies ? ` · ${appliedSpecies}` : ''}`;
+                `Périmètre : ${scopeLabel}${analyticsYear ? ` · année ${analyticsYear}` : ''}${appliedGroup ? ` · ${appliedGroup}` : ''}${appliedSpecies ? ` · ${appliedSpecies}` : ''} · n = ${totals.count.toLocaleString('fr-FR')}`;
 
+            // Tous les groupes présents (même sans nom d'espèce) → détail cliquable
             const groupSpeciesMap = new Map();
             scopeDataset.forEach(row => {
                 const group = getTaxonomicGroupForSinpRow(row) || 'Autre';
-                const species = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
-                if (!species) return;
                 if (!groupSpeciesMap.has(group)) groupSpeciesMap.set(group, new Set());
-                groupSpeciesMap.get(group).add(species);
+                const species = getSpeciesLabelForSinpRow(row);
+                if (species) groupSpeciesMap.get(group).add(species);
             });
             renderGroupSpeciesDetails(groupSpeciesMap);
 
             const zoneSpeciesMap = new Map();
             dataset.forEach(row => {
                 const zone = String(row[zoneField] || 'Non renseignée').trim() || 'Non renseignée';
-                const species = String(row['nomCite'] || row['nomvalide(R)'] || '').trim();
+                const species = getSpeciesLabelForSinpRow(row);
                 if (!species) return;
                 if (!zoneSpeciesMap.has(zone)) zoneSpeciesMap.set(zone, new Set());
                 zoneSpeciesMap.get(zone).add(species);
@@ -8150,32 +8781,27 @@
 
             const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
             const monthLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-            const monthIndividuals = Object.fromEntries(months.map(m => [m, 0]));
-            const monthCouples = Object.fromEntries(months.map(m => [m, 0]));
-            const monthCounts = Object.fromEntries(months.map(m => [m, 0]));
+            const monthBuckets = Object.fromEntries(months.map(m => [m, emptyMetricBucket()]));
 
             dataset.forEach(row => {
                 const month = getMonthFromJourDate(row['jourdateDebut']);
-                if (!month) return;
-                const type = getCountType(row).toLowerCase();
-                const count = getEstimatedIndividuals(row);
-                if (type === 'couple') monthCouples[month] += count;
-                if (type === 'individu' || type === 'ind') monthIndividuals[month] += count;
-                monthCounts[month] += 1;
+                if (!month || !monthBuckets[month]) return;
+                accumulateObservationMetrics(row, monthBuckets[month]);
             });
 
-            const phenologyIndividuals = months.map(m => monthIndividuals[m]);
-            const phenologyCouples = months.map(m => monthCouples[m]);
-            const phenologyCounts = months.map(m => monthCounts[m]);
-            const peakIndividualsIdx = phenologyIndividuals.reduce((bestIdx, val, idx, arr) => val > arr[bestIdx] ? idx : bestIdx, 0);
-            const peakCouplesIdx = phenologyCouples.reduce((bestIdx, val, idx, arr) => val > arr[bestIdx] ? idx : bestIdx, 0);
-            const n = dataset.length;
+            const phenologyObs = months.map(m => monthBuckets[m].count);
+            const phenologyIndividuals = months.map(m => monthBuckets[m].individuals);
+            const phenologyCouples = months.map(m => monthBuckets[m].couples);
+            const peakObsIdx = phenologyObs.reduce((bestIdx, val, idx, arr) => val > arr[bestIdx] ? idx : bestIdx, 0);
+            const n = totals.count;
             document.getElementById('analyticsInsights').innerHTML = n === 0
                 ? 'Aucune donnée sur ce périmètre. Ajustez les filtres ou la zone dessinée.'
-                : `<strong>Synthèse (n = ${n.toLocaleString('fr-FR')})</strong> — ` +
-                  `pic individus : ${monthLabels[peakIndividualsIdx]} (${phenologyIndividuals[peakIndividualsIdx].toLocaleString('fr-FR')}) · ` +
-                  `pic couples : ${monthLabels[peakCouplesIdx]} (${phenologyCouples[peakCouplesIdx].toLocaleString('fr-FR')}) · ` +
-                  `richesse : ${speciesSet.size.toLocaleString('fr-FR')} taxons.`;
+                : `<strong>Synthèse</strong> — ${n.toLocaleString('fr-FR')} observations · ` +
+                  `${speciesSet.size.toLocaleString('fr-FR')} taxons · ` +
+                  `${totals.individuals.toLocaleString('fr-FR')} individus dénombrés · ` +
+                  `${totals.couples.toLocaleString('fr-FR')} couples · ` +
+                  `${totals.presenceOnly.toLocaleString('fr-FR')} obs. sans effectif · ` +
+                  `pic d’activité : ${monthLabels[peakObsIdx]}`;
 
             // Composition par groupe
             const groupObsMap = new Map();
@@ -8190,137 +8816,192 @@
                     if (!/^autre$/i.test(a.group) && /^autre$/i.test(b.group)) return -1;
                     return b.count - a.count;
                 });
+            const groupTotal = groupData.reduce((s, g) => s + g.count, 0) || 1;
 
             // Effort interannuel
             const yearAgg = new Map();
             dataset.forEach(row => {
                 const y = parseYearFromJourDate(row['jourdateDebut']) || 'NR';
-                if (!yearAgg.has(y)) yearAgg.set(y, { count: 0, species: new Set() });
-                const b = yearAgg.get(y);
-                b.count += 1;
-                const sp = (row['nomCite'] || row['nomvalide(R)'] || '').trim();
-                if (sp) b.species.add(sp);
+                if (!yearAgg.has(y)) yearAgg.set(y, emptyMetricBucket());
+                accumulateObservationMetrics(row, yearAgg.get(y));
             });
             const yearKeys = Array.from(yearAgg.keys()).sort((a, b) => String(a).localeCompare(String(b)));
             const yearCounts = yearKeys.map(y => yearAgg.get(y).count);
-            const yearRichness = yearKeys.map(y => yearAgg.get(y).species.size);
+            const yearRichness = yearKeys.map(y => yearAgg.get(y).speciesSet.size);
 
             destroyAnalyticsCharts();
-            const zoneCanvas = document.getElementById('chartSpeciesByZone');
-            const phenologyCanvas = document.getElementById('chartPhenology');
-            const groupCanvas = document.getElementById('chartByGroup');
-            const yearCanvas = document.getElementById('chartByYear');
+            const phenologyCanvas = resetChartCanvas('chartPhenology');
+            const zoneCanvas = resetChartCanvas('chartSpeciesByZone');
+            const groupCanvas = resetChartCanvas('chartByGroup');
+            const yearCanvas = resetChartCanvas('chartByYear');
             if (!zoneCanvas || !phenologyCanvas || !groupCanvas || !yearCanvas || typeof Chart === 'undefined') return;
 
+            const emptyPlugin = {
+                id: 'cenEmptyChart',
+                afterDraw(chart) {
+                    const hasData = (chart.data.datasets || []).some(ds => (ds.data || []).some(v => Number(v) > 0));
+                    if (hasData) return;
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return;
+                    ctx.save();
+                    ctx.fillStyle = '#6d7f92';
+                    ctx.font = "500 13px 'Source Serif 4', Georgia, serif";
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Aucune donnée pour cette figure', (chartArea.left + chartArea.right) / 2, (chartArea.top + chartArea.bottom) / 2);
+                    ctx.restore();
+                }
+            };
+
             analyticsCharts.phenology = new Chart(phenologyCanvas, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: monthLabels,
-                    datasets: appliedSpecies
-                        ? [
-                            {
-                                label: 'Observations',
-                                data: phenologyCounts,
-                                borderColor: ANALYTICS_SCI_COLORS[0],
-                                backgroundColor: 'rgba(0, 114, 178, 0.08)',
-                                borderWidth: 2,
-                                tension: 0.15,
-                                fill: true,
-                                pointRadius: 3.5,
-                                pointHoverRadius: 5,
-                                pointBackgroundColor: '#fff',
-                                pointBorderWidth: 2
-                            },
-                            {
-                                label: 'Individus estimés',
-                                data: phenologyIndividuals,
-                                borderColor: ANALYTICS_SCI_COLORS[1],
-                                backgroundColor: 'transparent',
-                                borderWidth: 2,
-                                tension: 0.15,
-                                fill: false,
-                                pointRadius: 3.5,
-                                pointHoverRadius: 5,
-                                pointBackgroundColor: '#fff',
-                                pointBorderWidth: 2
-                            }
-                        ]
-                        : [
-                            {
-                                label: 'Individus estimés',
-                                data: phenologyIndividuals,
-                                borderColor: ANALYTICS_SCI_COLORS[0],
-                                backgroundColor: 'rgba(0, 114, 178, 0.1)',
-                                borderWidth: 2,
-                                tension: 0.15,
-                                fill: true,
-                                pointRadius: 3.5,
-                                pointHoverRadius: 5,
-                                pointBackgroundColor: '#fff',
-                                pointBorderWidth: 2,
-                                yAxisID: 'y'
-                            },
-                            {
-                                label: 'Couples',
-                                data: phenologyCouples,
-                                borderColor: ANALYTICS_SCI_COLORS[2],
-                                backgroundColor: 'transparent',
-                                borderWidth: 2,
-                                borderDash: [4, 3],
-                                tension: 0.15,
-                                fill: false,
-                                pointRadius: 3.5,
-                                pointHoverRadius: 5,
-                                pointBackgroundColor: '#fff',
-                                pointBorderWidth: 2,
-                                yAxisID: 'y'
-                            }
-                        ]
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Observations',
+                            data: phenologyObs,
+                            backgroundColor: 'rgba(0, 114, 178, 0.28)',
+                            borderColor: ANALYTICS_SCI_COLORS[0],
+                            borderWidth: 1,
+                            borderRadius: 0,
+                            yAxisID: 'y',
+                            order: 3
+                        },
+                        {
+                            type: 'line',
+                            label: 'Individus estimés',
+                            data: phenologyIndividuals,
+                            borderColor: ANALYTICS_SCI_COLORS[1],
+                            backgroundColor: '#fff',
+                            borderWidth: 2.25,
+                            tension: 0.2,
+                            fill: false,
+                            pointRadius: 3.5,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: '#fff',
+                            pointBorderWidth: 2,
+                            yAxisID: 'y1',
+                            order: 1
+                        },
+                        {
+                            type: 'line',
+                            label: 'Couples',
+                            data: phenologyCouples,
+                            borderColor: ANALYTICS_SCI_COLORS[2],
+                            backgroundColor: '#fff',
+                            borderWidth: 2,
+                            borderDash: [5, 4],
+                            tension: 0.2,
+                            fill: false,
+                            pointRadius: 3.5,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: '#fff',
+                            pointBorderWidth: 2,
+                            yAxisID: 'y1',
+                            order: 2
+                        }
+                    ]
                 },
                 options: getChartBaseOptions({
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', align: 'end' },
+                        tooltip: {
+                            callbacks: {
+                                footer: (items) => {
+                                    if (!items.length) return '';
+                                    const i = items[0].dataIndex;
+                                    return `Présences S/D : ${monthBuckets[months[i]].presenceOnly}`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
-                            title: { display: true, text: 'Effectif' }
+                            position: 'left',
+                            beginAtZero: true,
+                            title: { display: true, text: 'Observations (n)' },
+                            ticks: { precision: 0 }
+                        },
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Effectifs estimés' },
+                            ticks: { precision: 0 }
                         },
                         x: {
-                            title: { display: true, text: 'Mois' }
+                            title: { display: true, text: 'Mois civil' }
                         }
                     }
-                })
+                }),
+                plugins: [emptyPlugin]
             });
 
             analyticsCharts.speciesByZone = new Chart(zoneCanvas, {
                 type: 'bar',
                 data: {
-                    labels: zoneData.map(z => z.zone.length > 32 ? `${z.zone.slice(0, 32)}…` : z.zone),
+                    labels: zoneData.map(z => z.zone.length > 36 ? `${z.zone.slice(0, 36)}…` : z.zone),
                     datasets: [{
-                        label: 'Espèces uniques',
+                        label: 'Richesse (S)',
                         data: zoneData.map(z => z.count),
                         backgroundColor: ANALYTICS_SCI_COLORS[0],
-                        borderColor: ANALYTICS_SCI_COLORS[0],
                         borderWidth: 0,
                         borderRadius: 0,
-                        barPercentage: 0.72,
-                        categoryPercentage: 0.82
+                        barPercentage: 0.78,
+                        categoryPercentage: 0.86
                     }]
                 },
-                options: getChartBaseOptions({
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
                     indexAxis: 'y',
-                    plugins: { legend: { display: false } },
+                    animation: { duration: 280, easing: 'easeOutCubic' },
+                    interaction: { mode: 'nearest', axis: 'y', intersect: true },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            position: 'nearest',
+                            backgroundColor: 'rgba(10, 28, 46, 0.94)',
+                            titleFont: { family: "'DM Sans', sans-serif", size: 12, weight: '600' },
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 11 },
+                            padding: 10,
+                            cornerRadius: 2,
+                            callbacks: {
+                                title: (items) => {
+                                    const i = items?.[0]?.dataIndex;
+                                    return (i != null && zoneData[i]) ? zoneData[i].zone : '';
+                                },
+                                label: (ctx) => {
+                                    const i = ctx.dataIndex;
+                                    const nSp = zoneData[i]?.count ?? ctx.parsed?.x ?? 0;
+                                    return ` ${Number(nSp).toLocaleString('fr-FR')} espèce(s) unique(s)`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         x: {
                             beginAtZero: true,
-                            title: { display: true, text: 'Nb d’espèces' },
-                            grid: { color: 'rgba(165, 180, 196, 0.35)', drawBorder: false },
-                            ticks: { precision: 0, font: { family: "'JetBrains Mono', monospace", size: 10 } }
+                            title: {
+                                display: true,
+                                text: 'Nombre d’espèces (S)',
+                                font: { family: "'DM Sans', sans-serif", size: 11, weight: '600' },
+                                color: '#3a4f64'
+                            },
+                            ticks: { precision: 0, font: { family: "'JetBrains Mono', monospace", size: 10 }, color: '#5a6f84' },
+                            grid: { color: 'rgba(165, 180, 196, 0.35)', drawBorder: false }
                         },
                         y: {
-                            beginAtZero: false,
                             grid: { display: false },
-                            ticks: { font: { family: "'DM Sans', sans-serif", size: 10 }, autoSkip: false }
+                            ticks: { autoSkip: false, font: { family: "'DM Sans', sans-serif", size: 10 }, color: '#5a6f84' }
                         }
                     }
-                })
+                },
+                plugins: [emptyPlugin]
             });
 
             analyticsCharts.byGroup = new Chart(groupCanvas, {
@@ -8333,30 +9014,77 @@
                         backgroundColor: groupData.map((_, i) => ANALYTICS_SCI_COLORS[i % ANALYTICS_SCI_COLORS.length]),
                         borderColor: '#ffffff',
                         borderWidth: 2,
-                        hoverOffset: 4
+                        hoverOffset: 6
                     }]
                 },
-                options: getChartBaseOptions({
-                    cutout: '55%',
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    cutout: '58%',
+                    animation: { duration: 280, easing: 'easeOutCubic' },
+                    onClick: (_evt, elements) => {
+                        if (!elements || !elements.length) return;
+                        const idx = elements[0].index;
+                        const group = groupData[idx]?.group;
+                        if (!group) return;
+                        analyticsSelectedGroupDetail = (analyticsSelectedGroupDetail === group) ? '' : group;
+                        renderGroupSpeciesDetails(lastAnalyticsGroupSpeciesMap);
+                        highlightGroupOnDoughnut(analyticsSelectedGroupDetail);
+                        scrollToGroupSpeciesDetail();
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: 'right',
                             align: 'center',
-                            labels: { padding: 8, boxWidth: 10, font: { size: 10 } }
+                            labels: {
+                                padding: 10,
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                font: { family: "'DM Sans', sans-serif", size: 10, weight: '500' },
+                                color: '#3a4f64',
+                                generateLabels: (chart) => {
+                                    const ds = chart.data.datasets[0];
+                                    return (chart.data.labels || []).map((label, i) => {
+                                        const val = Number(ds.data[i] || 0);
+                                        const pct = ((val / groupTotal) * 100).toFixed(1).replace('.', ',');
+                                        return {
+                                            text: `${label}  ${pct}%`,
+                                            fillStyle: ds.backgroundColor[i],
+                                            strokeStyle: '#fff',
+                                            lineWidth: 1,
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            },
+                            onClick: (_e, legendItem) => {
+                                const group = groupData[legendItem.index]?.group;
+                                if (!group) return;
+                                analyticsSelectedGroupDetail = (analyticsSelectedGroupDetail === group) ? '' : group;
+                                renderGroupSpeciesDetails(lastAnalyticsGroupSpeciesMap);
+                                highlightGroupOnDoughnut(analyticsSelectedGroupDetail);
+                                scrollToGroupSpeciesDetail();
+                            }
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(10, 28, 46, 0.94)',
+                            titleFont: { family: "'DM Sans', sans-serif", size: 12, weight: '600' },
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 11 },
+                            padding: 10,
+                            cornerRadius: 2,
                             callbacks: {
                                 label: (ctx) => {
                                     const val = Number(ctx.raw || 0);
-                                    const total = groupData.reduce((s, g) => s + g.count, 0) || 1;
-                                    const pct = ((val / total) * 100).toFixed(1).replace('.', ',');
-                                    return ` ${ctx.label}: ${val.toLocaleString('fr-FR')} (${pct} %)`;
-                                }
+                                    const pct = ((val / groupTotal) * 100).toFixed(1).replace('.', ',');
+                                    return ` ${ctx.label}: ${val.toLocaleString('fr-FR')} obs. (${pct} %)`;
+                                },
+                                afterLabel: () => 'Clic → liste des espèces'
                             }
                         }
-                    },
-                    scales: { x: { display: false }, y: { display: false } }
-                })
+                    }
+                },
+                plugins: [emptyPlugin]
             });
 
             analyticsCharts.byYear = new Chart(yearCanvas, {
@@ -8376,14 +9104,14 @@
                         },
                         {
                             type: 'line',
-                            label: 'Richesse spécifique',
+                            label: 'Richesse spécifique (S)',
                             data: yearRichness,
                             borderColor: ANALYTICS_SCI_COLORS[1],
                             backgroundColor: '#fff',
-                            borderWidth: 2,
-                            tension: 0.12,
-                            pointRadius: 3.5,
-                            pointHoverRadius: 5,
+                            borderWidth: 2.25,
+                            tension: 0.15,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
                             pointBackgroundColor: '#fff',
                             pointBorderWidth: 2,
                             yAxisID: 'y1',
@@ -8392,27 +9120,30 @@
                     ]
                 },
                 options: getChartBaseOptions({
+                    interaction: { mode: 'index', intersect: false },
                     scales: {
                         y: {
                             position: 'left',
-                            title: { display: true, text: 'Observations' },
-                            beginAtZero: true
+                            title: { display: true, text: 'Observations (n)' },
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
                         },
                         y1: {
                             position: 'right',
                             beginAtZero: true,
                             grid: { drawOnChartArea: false },
-                            title: { display: true, text: 'Espèces uniques', font: { family: "'DM Sans', sans-serif", size: 11, weight: '600' }, color: '#3a4f64' },
-                            ticks: { color: '#5a6f84', precision: 0, font: { family: "'JetBrains Mono', monospace", size: 10 } },
-                            border: { display: false }
+                            title: { display: true, text: 'Richesse (S)', color: '#009E73' },
+                            ticks: { color: '#009E73', precision: 0 }
                         },
                         x: {
-                            title: { display: true, text: 'Année' }
+                            title: { display: true, text: 'Année civile' }
                         }
                     }
-                })
+                }),
+                plugins: [emptyPlugin]
             });
 
+            if (analyticsSelectedGroupDetail) highlightGroupOnDoughnut(analyticsSelectedGroupDetail);
             if (analyticsCustomChartConfigs.length === 0) {
                 analyticsCustomChartCounter += 1;
                 analyticsCustomChartConfigs.push({
