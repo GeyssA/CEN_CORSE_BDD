@@ -706,11 +706,18 @@
         }
 
         #sharedFiltersRoot:has(.autocomplete-dropdown.active) {
-            z-index: 220;
+            z-index: 10000;
+            isolation: isolate;
         }
 
         .search-section:has(.autocomplete-dropdown.active) {
-            z-index: 220;
+            z-index: 10000;
+        }
+
+        .filter-row:has(.autocomplete-dropdown.active),
+        .form-group.search-input:has(.autocomplete-dropdown.active) {
+            position: relative;
+            z-index: 10001;
         }
 
         .filters-resize-bar {
@@ -917,7 +924,7 @@
             border-radius: 0 0 6px 6px;
             max-height: 280px;
             overflow-y: auto;
-            z-index: 500;
+            z-index: 10002;
             box-shadow: 0 8px 24px rgba(26, 95, 74, 0.15);
         }
 
@@ -2040,7 +2047,12 @@
             flex-shrink: 0;
         }
 
-        /* Map Section */
+        /* Map Section — z-index bas pour laisser les suggestions de filtres au-dessus */
+        #tab-map.active {
+            position: relative;
+            z-index: 1;
+        }
+
         .map-section {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -2052,6 +2064,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            z-index: 1;
         }
 
         .map-header {
@@ -4117,9 +4130,19 @@
         function getRowSelectionKey(row) {
             const id = String(row?.['identifiantOrigine'] ?? '').trim();
             if (id) return id;
+            if (row && Number.isInteger(row.__idx)) return `idx:${row.__idx}`;
             const lat = row?.['Latitude (coordonnée y)'];
             const lon = row?.['Longitude (coordonnée x)'];
             return `geo:${lat}|${lon}|${row?.['nomCite'] ?? ''}|${row?.['jourdateDebut'] ?? ''}`;
+        }
+
+        /** Retrouve la ligne SINP liée à une ligne lisible (y compris sans identifiantOrigine). */
+        function resolveSinpFromReadable(readableRow) {
+            if (!readableRow) return null;
+            if (readableRow.__sinpRef) return readableRow.__sinpRef;
+            const id = String(readableRow['IDENTIFIANTORIGINE'] ?? '').trim();
+            if (id && sinpById.has(id)) return sinpById.get(id);
+            return null;
         }
 
         function getActiveData() {
@@ -4151,10 +4174,11 @@
         function updateResultsCountFromActiveData() {
             syncFilteredDataFromSelection();
             const n = filteredData.length;
+            const geolocated = countGeolocatedRows(filteredData);
             const resultsCountEl = document.getElementById('resultsCount');
             const info = document.getElementById('resultsInfoText');
             if (resultsCountEl) {
-                resultsCountEl.innerHTML = `<strong>${n.toLocaleString('fr-FR')}</strong> résultat${n > 1 ? 's' : ''}`;
+                resultsCountEl.innerHTML = `<strong>${n.toLocaleString('fr-FR')}</strong> résultat${n > 1 ? 's' : ''}${formatMissingCoordsHint(n, geolocated)}`;
             }
             if (info) {
                 info.textContent = selectedRowKeys.size > 0
@@ -4731,8 +4755,7 @@
 
             // Pass 1 : résoudre via TaxRef / SINP / nom
             readableRows.forEach((r) => {
-                const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
-                const sinpRow = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                const sinpRow = resolveSinpFromReadable(r);
                 const g = resolveGroupeForReadableRow(r, sinpRow);
                 if (g) {
                     r['GROUPE'] = g;
@@ -4759,8 +4782,7 @@
                     g = genus ? groupByGenus.get(genus) : '';
                 }
                 if (!g) {
-                    const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
-                    const sinpRow = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                    const sinpRow = resolveSinpFromReadable(r);
                     const nomCite = normalizeTaxonName(sinpRow?.['nomCite']);
                     const nomValide = normalizeTaxonName(sinpRow?.['nomvalide(R)']);
                     g = (nomCite && groupBySpecies.get(nomCite))
@@ -4791,8 +4813,7 @@
                     r['GROUPE'] = normalizeTaxonomicGroupLabel(r['GROUPE']);
                     return;
                 }
-                const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
-                const sinpRow = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                const sinpRow = resolveSinpFromReadable(r);
                 let g = inferGroupeFromGenusName(r['NOM_TAXON'])
                     || inferGroupeFromGenusName(sinpRow?.['nomCite'])
                     || inferGroupeFromGenusName(sinpRow?.['nomvalide(R)'])
@@ -5565,7 +5586,8 @@
                 filteredData = applyObservationVisibilityFilter([...allData]);
                 baseFilteredData = [...filteredData];
                 sinpById = new Map();
-                allData.forEach(r => {
+                allData.forEach((r, idx) => {
+                    r.__idx = idx;
                     const id = String(r['identifiantOrigine'] ?? '').trim();
                     if (id) sinpById.set(id, r);
                 });
@@ -5591,8 +5613,7 @@
                         6,
                         'lignes lisibles chargées'
                     );
-                    readableData = readableRows;
-                    readableData.forEach(r => {
+                    readableRows.forEach(r => {
                         const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
                         const cd = String(r['cdNom'] ?? r['CDNOM'] ?? '').trim();
                         const cdFromSinp = orig && sinpById.has(orig) ? String(sinpById.get(orig)['cdNom'] ?? '').trim() : '';
@@ -5603,34 +5624,39 @@
                         } else if (vn) {
                             setReadableNomVernaculaire(r, vn);
                         }
-                    });
-                    // Complète GROUPE manquants : TaxRef + jointure sur nom d'espèce / genre
-                    fillMissingGroupesFromSpeciesJoin(readableData);
-                    fillMissingCommunesForReadable(readableData);
-                    readableData.forEach(r => {
-                        sanitizeReadableRow(r);
-                        // Après sanitize : forcer COMMUNE (évite NR si polygone / SINP a trouvé)
-                        const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
-                        const sinp = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
-                        if (sinp && !isMissingCommune(sinp['nomCommune'])) {
-                            setReadableCommune(r, sinp['nomCommune']);
-                        } else if (!isMissingCommune(r['COMMUNE'])) {
-                            setReadableCommune(r, r['COMMUNE']);
-                        } else {
-                            // Dernier essai polygone
-                            const ll = parseReadableL93LatLng(r, sinp);
-                            if (ll) {
-                                const name = findCommuneNameForLatLng(ll.lat, ll.lng);
-                                if (name) setReadableCommune(r, name);
-                            }
-                        }
                         if (orig) readableById.set(orig, r);
                     });
                 } catch (readableError) {
                     console.warn('Vue lisible indisponible, fallback local:', readableError.message);
-                    readableData = allData.map(row => rowToReadable(row));
-                    fillMissingCommunesForReadable(readableData);
                 }
+
+                // Toujours une ligne lisible par observation SINP (même sans identifiantOrigine)
+                readableData = allData.map(sinpRow => {
+                    const id = String(sinpRow['identifiantOrigine'] ?? '').trim();
+                    const fromView = id && readableById.has(id) ? readableById.get(id) : null;
+                    const r = fromView ? Object.assign({}, fromView) : rowToReadable(sinpRow);
+                    r.__sinpRef = sinpRow;
+                    return r;
+                });
+                fillMissingGroupesFromSpeciesJoin(readableData);
+                fillMissingCommunesForReadable(readableData);
+                readableData.forEach(r => {
+                    sanitizeReadableRow(r);
+                    const sinp = resolveSinpFromReadable(r);
+                    if (sinp && !isMissingCommune(sinp['nomCommune'])) {
+                        setReadableCommune(r, sinp['nomCommune']);
+                    } else if (!isMissingCommune(r['COMMUNE'])) {
+                        setReadableCommune(r, r['COMMUNE']);
+                    } else {
+                        const ll = parseReadableL93LatLng(r, sinp);
+                        if (ll) {
+                            const name = findCommuneNameForLatLng(ll.lat, ll.lng);
+                            if (name) setReadableCommune(r, name);
+                        }
+                    }
+                    const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
+                    if (orig) readableById.set(orig, r);
+                });
                 
                 if (allData.length > 0) {
                     columns = Object.keys(allData[0]);
@@ -5915,8 +5941,7 @@
                 }
                 const isSinpLike = row['identifiantOrigine'] !== undefined || row['nomCite'] !== undefined || row['Cadre_Acquisition'] !== undefined;
                 if (isSinpLike) return getEffectiveGroupeForSinpRow(row);
-                const orig = String(row['IDENTIFIANTORIGINE'] ?? '').trim();
-                const sinp = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                const sinp = resolveSinpFromReadable(row);
                 return sinp ? getEffectiveGroupeForSinpRow(sinp) : 'Autre';
             }
             if (row[column] !== undefined && row[column] !== null && String(row[column]).trim() !== '') {
@@ -6248,7 +6273,7 @@
                 }
 
                 filteredData = filteredReadable
-                    .map(r => sinpById.get(String(r['IDENTIFIANTORIGINE'] ?? '').trim()))
+                    .map(r => resolveSinpFromReadable(r))
                     .filter(Boolean);
             } else {
                 if (filters.length === 0) {
@@ -6542,7 +6567,8 @@
             const pageData = displaySource.slice(start, end);
 
             const n = activeData.length;
-            resultsCount.innerHTML = `<strong>${n.toLocaleString('fr-FR')}</strong> résultat${n > 1 ? 's' : ''}`;
+            const geolocated = countGeolocatedRows(activeData);
+            resultsCount.innerHTML = `<strong>${n.toLocaleString('fr-FR')}</strong> résultat${n > 1 ? 's' : ''}${formatMissingCoordsHint(n, geolocated)}`;
             const info = document.getElementById('resultsInfoText');
             if (info) {
                 info.textContent = hasSelectionFilter
@@ -7316,9 +7342,7 @@
             return parseFloat(String(v).trim().replace(/\s/g, '').replace(',', '.'));
         }
 
-        function rowObservationLatLng(row) {
-            const x = parseCoordNumber(row['Longitude (coordonnée x)']);
-            const y = parseCoordNumber(row['Latitude (coordonnée y)']);
+        function latLngFromXY(x, y) {
             if (!Number.isFinite(x) || !Number.isFinite(y) || x === 0 || y === 0) return null;
             // Déjà en WGS84 (Corse)
             if (x >= 8 && x <= 10 && y >= 41 && y <= 44) {
@@ -7331,6 +7355,42 @@
             } catch (e) {
                 return null;
             }
+        }
+
+        function parseWktPointCoords(wkt) {
+            if (wkt === null || wkt === undefined || wkt === '') return null;
+            const m = String(wkt).trim().match(/^POINT\s*\(\s*([+-]?\d+(?:[.,]\d+)?)\s+([+-]?\d+(?:[.,]\d+)?)\s*\)$/i);
+            if (!m) return null;
+            const x = parseCoordNumber(m[1]);
+            const y = parseCoordNumber(m[2]);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+            return { x, y };
+        }
+
+        function rowObservationLatLng(row) {
+            const ll = latLngFromXY(
+                parseCoordNumber(row['Longitude (coordonnée x)']),
+                parseCoordNumber(row['Latitude (coordonnée y)'])
+            );
+            if (ll) return ll;
+            const wktPt = parseWktPointCoords(row['WKT si pas x,y']);
+            if (wktPt) return latLngFromXY(wktPt.x, wktPt.y);
+            return null;
+        }
+
+        function countGeolocatedRows(rows) {
+            if (!rows || !rows.length) return 0;
+            let n = 0;
+            for (const row of rows) {
+                if (rowObservationLatLng(row)) n++;
+            }
+            return n;
+        }
+
+        function formatMissingCoordsHint(totalRows, geolocatedCount) {
+            const missing = totalRows - geolocatedCount;
+            if (missing <= 0) return '';
+            return ` · <span style="font-weight:400;color:var(--text-muted)">${missing.toLocaleString('fr-FR')} sans coord. valides</span>`;
         }
 
         /** Polygones communes Corse (GeoJSON WGS84) pour compléter nomCommune manquant */
@@ -7545,8 +7605,7 @@
                     setReadableCommune(r, r['COMMUNE']);
                     return;
                 }
-                const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
-                const sinp = orig && sinpById.has(orig) ? sinpById.get(orig) : null;
+                const sinp = resolveSinpFromReadable(r);
 
                 // 1) Reprendre nomCommune SINP déjà complété
                 if (sinp && !isMissingCommune(sinp['nomCommune'])) {
@@ -7914,7 +7973,8 @@
             const selectionHint = highlightSelection
                 ? ` <span style="font-weight:600;color:var(--accent-teal)">(filtre sélection)</span>`
                 : '';
-            document.getElementById('mapStats').innerHTML = `<strong>${pointCount.toLocaleString('fr-FR')}</strong> observations géolocalisées${selectionHint}${zoneHint}`;
+            const missingHint = formatMissingCoordsHint(dataToShow.length, pointCount);
+            document.getElementById('mapStats').innerHTML = `<strong>${pointCount.toLocaleString('fr-FR')}</strong> observations géolocalisées${missingHint}${selectionHint}${zoneHint}`;
 
             const overlay = document.getElementById('mapLoadingOverlay');
             if (overlay) overlay.classList.remove('visible');
