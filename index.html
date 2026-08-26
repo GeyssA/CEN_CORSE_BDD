@@ -4427,23 +4427,74 @@
             tarentola: 'Reptiles', hemidactylus: 'Reptiles', vipera: 'Reptiles', natrix: 'Reptiles',
             hierophis: 'Reptiles', zamensis: 'Reptiles', coluber: 'Reptiles', anguis: 'Reptiles',
             chalcides: 'Reptiles', blanus: 'Reptiles',
+            algyroides: 'Reptiles', zamenis: 'Reptiles', malpolon: 'Reptiles', hemorrhois: 'Reptiles',
+            archaeolacerta: 'Reptiles', euleptes: 'Reptiles', tiimon: 'Reptiles',
+            // Amphibiens
+            bufotes: 'Amphibiens', bufo: 'Amphibiens', hyla: 'Amphibiens', discoglossus: 'Amphibiens',
+            euproctus: 'Amphibiens', salamandra: 'Amphibiens', speleomantes: 'Amphibiens',
+            hydromantes: 'Amphibiens', rana: 'Amphibiens', pelophylax: 'Amphibiens',
+            triturus: 'Amphibiens', lissotriton: 'Amphibiens', ichthyosaura: 'Amphibiens',
+            alytes: 'Amphibiens', pelobates: 'Amphibiens', bombina: 'Amphibiens', epidalea: 'Amphibiens',
+            // Insectes (dont neuropteres / ascalaphes / coleopteres / chironomes)
+            trichodes: 'Insectes', libelloides: 'Insectes', tanytarsus: 'Insectes',
+            deleproctophylla: 'Insectes', theleproctophylla: 'Insectes',
+            // Plantes
+            orobanche: 'Plantes', isoetes: 'Plantes', orchidaceae: 'Plantes',
+            // Oiseaux (Faune-France / Corse)
+            aquila: 'Oiseaux', buteo: 'Oiseaux', milvus: 'Oiseaux', circus: 'Oiseaux',
+            falco: 'Oiseaux', accipiter: 'Oiseaux', gyps: 'Oiseaux', gypaetus: 'Oiseaux',
+            athene: 'Oiseaux', tyto: 'Oiseaux', bubo: 'Oiseaux', otus: 'Oiseaux',
+            columba: 'Oiseaux', streptopelia: 'Oiseaux', apus: 'Oiseaux', hirundo: 'Oiseaux',
+            delichon: 'Oiseaux', ptyonoprogne: 'Oiseaux', passer: 'Oiseaux', fringilla: 'Oiseaux',
+            carduelis: 'Oiseaux', chloris: 'Oiseaux', serinus: 'Oiseaux', emberiza: 'Oiseaux',
+            turdus: 'Oiseaux', erithacus: 'Oiseaux', luscinia: 'Oiseaux', phoenicurus: 'Oiseaux',
+            saxicola: 'Oiseaux', oenanthe: 'Oiseaux', motacilla: 'Oiseaux', anthus: 'Oiseaux',
+            parus: 'Oiseaux', cyanistes: 'Oiseaux', periparus: 'Oiseaux', aegithalos: 'Oiseaux',
+            sitta: 'Oiseaux', certhia: 'Oiseaux', troglodytes: 'Oiseaux', regulus: 'Oiseaux',
+            sylvia: 'Oiseaux', curruca: 'Oiseaux', phylloscopus: 'Oiseaux', cettia: 'Oiseaux',
+            hippolais: 'Oiseaux', acrocephalus: 'Oiseaux', muscicapa: 'Oiseaux', ficedula: 'Oiseaux',
+            larus: 'Oiseaux', ichthyaetus: 'Oiseaux', sterna: 'Oiseaux', thalasseus: 'Oiseaux',
+            phalacrocorax: 'Oiseaux', gulosus: 'Oiseaux', egretta: 'Oiseaux', ardea: 'Oiseaux',
+            bubulcus: 'Oiseaux', ixobrychus: 'Oiseaux', anas: 'Oiseaux', tadorna: 'Oiseaux',
+            gallinula: 'Oiseaux', fulica: 'Oiseaux', charadrius: 'Oiseaux', calidris: 'Oiseaux',
+            tringa: 'Oiseaux', actitis: 'Oiseaux', scolopax: 'Oiseaux', gallinago: 'Oiseaux',
+            himantopus: 'Oiseaux', alcedo: 'Oiseaux', upupa: 'Oiseaux', merops: 'Oiseaux',
+            coracias: 'Oiseaux', picus: 'Oiseaux', dendrocopos: 'Oiseaux',
+            corvus: 'Oiseaux', pica: 'Oiseaux', garrulus: 'Oiseaux', pyrrhocorax: 'Oiseaux',
+            sturnus: 'Oiseaux', oriolus: 'Oiseaux', lanius: 'Oiseaux', cuculus: 'Oiseaux',
+            caprimulgus: 'Oiseaux', coturnix: 'Oiseaux', alectoris: 'Oiseaux',
+            // Mammifères
+            vulpes: 'Mammifères', sus: 'Mammifères', cervus: 'Mammifères', ovis: 'Mammifères',
+            capra: 'Mammifères', mus: 'Mammifères', rattus: 'Mammifères', apodemus: 'Mammifères',
+            eliomys: 'Mammifères', glis: 'Mammifères', erinaceus: 'Mammifères', crocidura: 'Mammifères',
+            mustela: 'Mammifères', martes: 'Mammifères', meles: 'Mammifères', felis: 'Mammifères',
+            lepus: 'Mammifères', oryctolagus: 'Mammifères', pipistrellus: 'Mammifères',
+            nyctalus: 'Mammifères', myotis: 'Mammifères', rhinolophus: 'Mammifères',
+            eptesicus: 'Mammifères', miniopterus: 'Mammifères', tadarida: 'Mammifères', hypsugo: 'Mammifères',
             // Plathelminthes
             dugesia: 'Autre', planaria: 'Autre', dendrocoelum: 'Autre'
         };
 
         function inferGroupeFromGenusName(speciesName) {
-            const nom = normalizeTaxonName(speciesName)
+            let nom = normalizeTaxonName(speciesName)
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\([^)]*\)/g, ' ')
                 .replace(/[^a-z0-9\s\-]/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
             if (!nom) return '';
+            nom = nom.replace(/\b(subsp|ssp|var|f|cf|aff|sp|spp)\b\.?/g, ' ').replace(/\s+/g, ' ').trim();
             if (/oligoch/.test(nom)) return 'Annélides';
             if (/hydracarin/.test(nom)) return 'Arachnides';
             if (/orchid/.test(nom)) return 'Plantes';
             if (/trichopter|ephemer|coleopter|dipter|hymenopter|chironom|simul|psychod|tipul|dixid|ceratopogon|plecopter|leuctr/.test(nom)) return 'Insectes';
-            if (/testudo|emys|mauremys|caretta|tortue|lezard|vipere|couleuvre|gecko/.test(nom)) return 'Reptiles';
+            if (/testudo|emys|mauremys|caretta|tortue|lezard|vipere|couleuvre|gecko|podarcis|hierophis|natrix|tarentola|algyroides|archaeolacerta|euleptes/.test(nom)) return 'Reptiles';
+            if (/bufotes|bufo|hyla|discoglossus|euproctus|salamandra|speleomantes|hydromantes|pelophylax|\brana\b|triturus|lissotriton|alytes|crapaud|grenouille|triton|salamandre/.test(nom)) return 'Amphibiens';
+            if (/trichodes|libelloides|tanytarsus|deleproctophylla|theleproctophylla/.test(nom)) return 'Insectes';
+            if (/orobanche/.test(nom)) return 'Plantes';
+            if (/passer|turdus|larus|falco|aquila|buteo|anas|egretta|ardea|columba|apus|hirundo|sylvia|phylloscopus|curruca/.test(nom)) return 'Oiseaux';
+            if (/pipistrell|myotis|rhinoloph|vulpes|lepus|oryctolagus|martes|mustela/.test(nom)) return 'Mammifères';
             const genus = nom.split(/\s+/)[0];
             if (!genus) return '';
             return GENUS_TO_GROUPE[genus] || '';
@@ -4694,23 +4745,29 @@
             const gGenus = inferGroupeFromGenusName(nomCite)
                 || inferGroupeFromGenusName(nomValide)
                 || inferGroupeFromGenusName(nomTaxonSource);
-            return normalizeTaxonomicGroupLabel(
-                gTaxonRef || gTaxonRefInferred || gLookup || gSinpTax || gGenus
-            );
+            // Ne jamais laisser « Autre » (TaxRef / lookup) court-circuiter le genre
+            const candidates = [gTaxonRef, gTaxonRefInferred, gLookup, gSinpTax, gGenus];
+            for (let i = 0; i < candidates.length; i++) {
+                const n = normalizeTaxonomicGroupLabel(candidates[i]);
+                if (n && n !== 'Autre') return n;
+            }
+            return '';
         }
 
         function resolveGroupeFromSpeciesName(speciesName, cdNom = '') {
             const nom = String(speciesName ?? '').trim();
             if (!nom || isNrToken(nom)) return '';
             const info = getTaxonInfoForName(nom, cdNom);
-            if (info.group) return normalizeTaxonomicGroupLabel(info.group);
+            const gInfo = normalizeTaxonomicGroupLabel(info.group || '');
+            if (gInfo && gInfo !== 'Autre') return gInfo;
             const sid = String(cdNom ?? '').trim();
             if (sid) {
                 const g = taxonRefGroupLabelById.get(sid)
                     || taxonRefGroupLabelById.get(taxonRefAcceptedNameUsageByScientificId.get(sid))
                     || taxonRefInferredGroupById.get(sid)
                     || taxonRefInferredGroupById.get(taxonRefAcceptedNameUsageByScientificId.get(sid));
-                if (g) return normalizeTaxonomicGroupLabel(g);
+                const gNorm = normalizeTaxonomicGroupLabel(g || '');
+                if (gNorm && gNorm !== 'Autre') return gNorm;
             }
             return inferGroupeFromGenusName(nom);
         }
@@ -5027,6 +5084,15 @@
             if (rowId && readableById.has(rowId)) {
                 return readableById.get(rowId);
             }
+            // Lignes sans ID : réutiliser la ligne lisible pré-calculée (GROUPE, communes…)
+            if (row && Number.isInteger(row.__idx)
+                && Array.isArray(readableData)
+                && readableData[row.__idx]) {
+                const cached = readableData[row.__idx];
+                // Réattache si besoin (après filtres / copies superficielles)
+                if (!cached.__sinpRef) cached.__sinpRef = row;
+                return cached;
+            }
 
             const nomCite = row['nomCite'];
             const nomValide = row['nomvalide(R)'];
@@ -5054,7 +5120,7 @@
                 })(),
                 COM_LOCAL: row['commentLocal(R)'] ?? '',
                 PROTOCOLE: '',
-                GROUPE: mergeGroupeFromDbAndLookup('', row),
+                GROUPE: mergeGroupeFromDbAndLookup('', row) || 'Autre',
                 NOM_TAXON: nomTaxonSource ?? '',
                 NOM_VERNACULAIRE: (() => {
                     const vn = getVernacularForCdNom(row['cdNom']);
@@ -5072,6 +5138,7 @@
                 X_L93: fmtCoord(lon),
                 Y_L93: fmtCoord(lat)
             };
+            if (row) built.__sinpRef = row;
             return sanitizeReadableRow(built);
         }
 
@@ -5347,22 +5414,61 @@
         }
 
         function getEffectiveGroupeForSinpRow(sinpRow) {
+            if (!sinpRow) return 'Autre';
+
             const id = String(sinpRow['identifiantOrigine'] ?? '').trim();
-            const rr = id && readableById.has(id) ? readableById.get(id) : null;
-            let g = '';
+            let rr = id && readableById.has(id) ? readableById.get(id) : null;
+            if (!rr && Number.isInteger(sinpRow.__idx) && Array.isArray(readableData) && readableData[sinpRow.__idx]) {
+                rr = readableData[sinpRow.__idx];
+            }
+
+            // 1) Inférence genre en premier (fiable pour EXPORT_FAUNEFRANCE_MB sans ID)
+            const nameCandidates = [
+                sinpRow['nomCite'],
+                sinpRow['nomvalide(R)'],
+                rr?.['NOM_TAXON'],
+                rr?.['nom_taxon'],
+                sinpRow.__speciesHint
+            ];
+            for (let i = 0; i < nameCandidates.length; i++) {
+                const gGenus = inferGroupeFromGenusName(nameCandidates[i]);
+                if (gGenus && gGenus !== 'Autre') {
+                    const g = normalizeTaxonomicGroupLabel(gGenus);
+                    sinpRow.__groupeEffective = g;
+                    if (rr) rr['GROUPE'] = g;
+                    return g;
+                }
+            }
+
+            // 2) GROUPE déjà fiable sur la ligne lisible
+            if (rr && !isMissingGroupe(rr['GROUPE'] ?? rr['groupe'])) {
+                const g = normalizeTaxonomicGroupLabel(rr['GROUPE'] ?? rr['groupe']);
+                sinpRow.__groupeEffective = g;
+                return g;
+            }
+
+            // 3) TaxRef / lookup (en ignorant « Autre »)
+            let g = mergeGroupeFromDbAndLookup('', sinpRow);
+            g = normalizeTaxonomicGroupLabel(g) || 'Autre';
+            sinpRow.__groupeEffective = g;
             if (rr) {
-                g = mergeGroupeFromDbAndLookup(rr['GROUPE'] ?? rr['groupe'], sinpRow);
+                rr['GROUPE'] = g;
+                Object.keys(rr).forEach((key) => {
+                    if (key !== 'GROUPE' && key.toLowerCase() === 'groupe') rr[key] = g;
+                });
             }
-            if (!g || g === 'Autre') {
-                g = mergeGroupeFromDbAndLookup('', sinpRow);
-            }
-            if (!g || g === 'Autre') {
-                g = inferGroupeFromGenusName(sinpRow?.['nomCite'])
-                    || inferGroupeFromGenusName(sinpRow?.['nomvalide(R)'])
-                    || inferGroupeFromGenusName(rr?.['NOM_TAXON'])
-                    || '';
-            }
-            return normalizeTaxonomicGroupLabel(g) || 'Autre';
+            return g;
+        }
+
+        function warmEffectiveGroupes() {
+            if (!Array.isArray(allData)) return;
+            allData.forEach((row) => {
+                delete row.__groupeEffective;
+                const g = getEffectiveGroupeForSinpRow(row);
+                if (Number.isInteger(row.__idx) && readableData?.[row.__idx]) {
+                    readableData[row.__idx]['GROUPE'] = g;
+                }
+            });
         }
 
         /** Charge taxon_ref : ids, lien vers taxon accepté, vernaculaire CSV, groupes pour sous-espèces. */
@@ -5403,7 +5509,7 @@
                         if (accStr !== sid) taxonRefAcceptedByScientificId.set(sid, accStr);
                         const gRaw = String(row.group_label ?? row.groupLabel ?? '').trim();
                         const gNorm = normalizeTaxonomicGroupLabel(gRaw);
-                        if (gNorm && !taxonRefGroupLabelById.has(sid)) {
+                        if (gNorm && gNorm !== 'Autre' && !taxonRefGroupLabelById.has(sid)) {
                             taxonRefGroupLabelById.set(sid, gNorm);
                         }
                         const clazz = String(row.tax_class ?? '').trim();
@@ -5639,6 +5745,20 @@
                     return r;
                 });
                 fillMissingGroupesFromSpeciesJoin(readableData);
+                // Passe forcée : recalcule tout GROUPE encore « Autre » / vide
+                readableData.forEach(r => {
+                    if (!isMissingGroupe(r['GROUPE'])) return;
+                    const sinp = resolveSinpFromReadable(r);
+                    const g = resolveGroupeForReadableRow(r, sinp)
+                        || (sinp ? mergeGroupeFromDbAndLookup('', sinp) : '')
+                        || inferGroupeFromGenusName(r['NOM_TAXON'])
+                        || inferGroupeFromGenusName(sinp?.['nomCite'])
+                        || inferGroupeFromGenusName(sinp?.['nomvalide(R)']);
+                    r['GROUPE'] = normalizeTaxonomicGroupLabel(g) || 'Autre';
+                    Object.keys(r).forEach((key) => {
+                        if (key !== 'GROUPE' && key.toLowerCase() === 'groupe') r[key] = r['GROUPE'];
+                    });
+                });
                 fillMissingCommunesForReadable(readableData);
                 readableData.forEach(r => {
                     sanitizeReadableRow(r);
@@ -5657,6 +5777,7 @@
                     const orig = String(r['IDENTIFIANTORIGINE'] ?? '').trim();
                     if (orig) readableById.set(orig, r);
                 });
+                warmEffectiveGroupes();
                 
                 if (allData.length > 0) {
                     columns = Object.keys(allData[0]);
@@ -6611,8 +6732,24 @@
                             return;
                         }
 
-                        let displayVal = formatCellDisplay(rawValue);
-                        html += `<td class="${cellClass}" title="${escapeHtml(rawValue)}">${displayVal}</td>`;
+                        if (col === 'GROUPE' || col === 'groupe') {
+                            // Toujours recalculer à l'affichage (évite GROUPE figé « Autre » sans ID)
+                            value = getEffectiveGroupeForSinpRow(row);
+                            if (isMissingGroupe(value)) {
+                                value = inferGroupeFromGenusName(r['NOM_TAXON'])
+                                    || inferGroupeFromGenusName(row['nomCite'])
+                                    || inferGroupeFromGenusName(row['nomvalide(R)'])
+                                    || 'Autre';
+                                value = normalizeTaxonomicGroupLabel(value) || 'Autre';
+                            }
+                            r['GROUPE'] = value;
+                            row.__groupeEffective = value;
+                        }
+
+                        let displayVal = formatCellDisplay(String(value ?? ''));
+                        const rawForTitle = String(value ?? '');
+                        html += `<td class="${cellClass}" title="${escapeHtml(rawForTitle)}">${displayVal}</td>`;
+                        return;
                     });
                     html += '</tr>';
                 });
@@ -7810,7 +7947,10 @@
             const fromSinp = String(row?.['nomCite'] || row?.['nomvalide(R)'] || '').trim();
             if (fromSinp && !isNrToken(fromSinp)) return fromSinp;
             const id = String(row?.['identifiantOrigine'] ?? '').trim();
-            const rr = id && readableById.has(id) ? readableById.get(id) : null;
+            let rr = id && readableById.has(id) ? readableById.get(id) : null;
+            if (!rr && Number.isInteger(row?.__idx) && Array.isArray(readableData) && readableData[row.__idx]) {
+                rr = readableData[row.__idx];
+            }
             const fromReadable = String(rr?.['NOM_TAXON'] ?? rr?.['nom_taxon'] ?? '').trim();
             if (fromReadable && !isNrToken(fromReadable)) return fromReadable;
             return fromSinp || fromReadable || '';
